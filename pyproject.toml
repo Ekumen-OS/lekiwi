@@ -1,0 +1,18 @@
+[project]
+name = "lekiwi-dora"
+version = "0.1.0"
+description = "Lekiwi dora integration."
+requires-python = ">=3.11"
+license = "MIT"
+dependencies = [
+]
+
+[tool.uv.workspace]
+members = [
+    "packages/dummy_package",
+]
+
+[tool.pyright]
+include = [
+  "packages/dummy_package",
+]

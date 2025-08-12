@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+# Cancel previously running PR jobs
+concurrency:
+  group: '${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install prerequisites
+        uses: awalsh128/cache-apt-pkgs-action@latest
+        with:
+          packages: libudev-dev
+          version: 1.0
+      - name: Install pre-commit
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install pre-commit
+      - name: Install pre-commit hooks
+        run: pre-commit install
+      - name: Indicate safe directory
+        ## See https://github.com/actions/checkout/issues/363
+        run: git config --global --add safe.directory $(realpath .)
+      - name: Rust cache
+        uses: Swatinem/rust-cache@v2
+      - run: pre-commit run --all-files --verbose --show-diff-on-failure
+
+  build_and_test_cargo:
+    name: Cargo Build & Test
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install prerequisites
+        uses: awalsh128/cache-apt-pkgs-action@latest
+        with:
+          packages: libudev-dev
+          version: 1.0
+      - name: Rust cache
+        uses: Swatinem/rust-cache@v2
+      - name: Cargo build
+        run: cargo build --workspace --all-targets
+      - name: Cargo test
+        run: cargo test --workspace --all-targets
+
+  build_and_test_uv:
+    name: UV Build & Test
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install uv package manager
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install uv
+      - name: UV build
+        run: uv build --all-packages
+      - name: pytest
+        run: uv run --all-packages pytest

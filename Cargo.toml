@@ -1,0 +1,23 @@
+[workspace]
+resolver = "2"
+members = [
+  "crates/dummy_crate"
+]
+
+[workspace.package]
+edition = "2024"
+license = "MIT"
+repository = "https://github.com/ekumenlabs/lekiwi-dora"
+authors = ["Franco Cipollone <franco.c@ekumenlabs.com>"]
+
+[workspace.dependencies]
+eyre = "0.6.8"
+itertools = { version = "0.14" }
+log = { version = "0.4" }
+rand = "0.8.5"
+thiserror = { version = "1.0" }
+tokio = { version = "1.24.2", features = ["rt", "macros"] }
+
+dora-node-api = { version = "0.3.12"}
+dora-cli = { version = "0.3.12"}
+dora-tracing = { version = "0.3.12"}

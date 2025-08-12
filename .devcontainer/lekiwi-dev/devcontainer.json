@@ -1,0 +1,44 @@
+{
+    "name": "lekiwi-dora dev",
+    // This is a workaround for the limitation of not being able to run $(id -u) in devcontainer.json
+    // so as to pass it to the build context via "build" dictionary.
+    // We are here using initializeCommand to run a script that builds the image with the correct UID and GID.
+    "initializeCommand": [".devcontainer/lekiwi-dev/initialize_command.sh"],
+    "image": "lekiwi-dora-dev-container",
+    "containerEnv": {
+      "DISPLAY": "${localEnv:DISPLAY}",
+      // Guarantee that the uv cache is in the same filesystem as the workspace
+      // to avoid copies.
+      "UV_CACHE_DIR": "${containerWorkspaceFolder}/.uv_cache"
+    },
+    "mounts": [
+      "type=bind,source=/dev,target=/dev",
+      "type=bind,source=/tmp/.X11-unix,target=/tmp/.X11-unix"
+    ],
+    "remoteUser": "dev",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "rust-lang.rust-analyzer",
+                "bierner.github-markdown-preview",
+                "bierner.markdown-preview-github-styles",
+                "github.vscode-github-actions",
+                "pbkit.vscode-pbkit",
+                "streetsidesoftware.code-spell-checker",
+                "yzhang.markdown-all-in-one",
+                "tamasfe.even-better-toml",
+                "ritwickdey.liveserver",
+                "ms-python.python",
+                "ms-python.vscode-pylance"
+            ]
+        }
+    },
+    // TODO(francocipollone): Create another devcontainer profile for non-GPU-enabled development
+    "runArgs": [
+        "--privileged", // Required for /dev access
+        "--network=host",
+        "--runtime=nvidia", // Use NVIDIA runtime for GPU access
+        "--gpus=all", // Use all available GPUs
+        "--name=lekiwi-dora"
+    ]
+}
