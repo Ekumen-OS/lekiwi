@@ -32,3 +32,5 @@ __pycache__
 
 # uv cache
 .uv_cache
+
+build/
