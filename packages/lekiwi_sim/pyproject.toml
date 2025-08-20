@@ -6,9 +6,7 @@ description = "Python package for simulating the Lekiwi robot in MuJoCo."
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-    "mujoco==3.2.6",
-    "numpy >=1.26.4",
-    "pyarrow >=12.0.1",
+    "mujoco>=3.2.6",
 ]
 
 [build-system]

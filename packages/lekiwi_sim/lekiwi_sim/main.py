@@ -5,9 +5,7 @@ from importlib import resources
 
 import mujoco
 import mujoco.viewer
-import numpy as np
-import pyarrow as pa
-import time
+
 
 def get_scene_path() -> str:
     """Get the path to the MuJoCo scene file."""
@@ -25,27 +23,24 @@ def get_timestep_config() -> float:
         raise ValueError from ValueError(f"Invalid TIMESTEP value: {timestep}. Must be a float.")
     return timestep
 
+
 def main() -> None:
     """Execute the LeKiwi MuJoCo simulation."""
     try:
         mj_model = mujoco.MjModel.from_xml_path(get_scene_path())
         mj_model.opt.timestep = get_timestep_config()
         mj_data = mujoco.MjData(mj_model)
-        mj_renderer = mujoco.Renderer(mj_model)
         with mujoco.viewer.launch_passive(mj_model, mj_data) as viewer:
             while viewer.is_running():
-                real_time_for_sim_step = time.time()
                 mujoco.mj_step(mj_model, mj_data)
                 viewer.sync()
-                time_until_next_step = mj_model.opt.timestep - (time.time() - real_time_for_sim_step)
-                if time_until_next_step > 0:
-                    time.sleep(time_until_next_step)                
 
     except KeyboardInterrupt:
         print("\nExiting simulation...")
     except Exception as e:
         print(f"Simulation error: {e}")
         raise e
+
 
 if __name__ == "__main__":
     main()
