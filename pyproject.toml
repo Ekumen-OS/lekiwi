@@ -9,10 +9,13 @@ dependencies = [
 
 [tool.uv.workspace]
 members = [
-    "packages/dummy_package",
+  "packages/dummy_package",
+  "packages/lekiwi_sim",
 ]
 
 [tool.pyright]
+exclude = ["crates*", "target*", "packages*"]
 include = [
   "packages/dummy_package",
+  "packages/lekiwi_sim",
 ]

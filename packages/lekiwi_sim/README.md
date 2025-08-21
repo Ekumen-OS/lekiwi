@@ -1,3 +1,5 @@
-Install: `pip install packages/lekiwi_sim/`
+Create environment: `uv venv -p 3.11 --seed`
 
-Run: `lewiki_sim`
+Install: `uv pip install -e .`
+
+Run: `uv run lekiwi_sim`
