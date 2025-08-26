@@ -1,4 +1,4 @@
-"Lekiwi host but for simulation"
+"""Lekiwi host but for simulation"""
 
 #!/usr/bin/env python
 
@@ -16,21 +16,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import base64
 import json
 import logging
 import time
 
 # import cv2
 import zmq
+from lerobot.robots.lekiwi.config_lekiwi import LeKiwiHostConfig
 
-from lerobot.robots.lekiwi.config_lekiwi import LeKiwiConfig, LeKiwiHostConfig
-
+from .config_lekiwi_sim import LeKiwiMujocoConfig
 from .lekiwi_mujoco import LeKiwiMujoco
 
 
 class LeKiwiSim:
+    """LeKiwi Host agent for simulation."""
+
     def __init__(self, config: LeKiwiHostConfig):
+        """Initialize the LeKiwi Host agent for simulation."""
         self.zmq_context = zmq.Context()
         self.zmq_cmd_socket = self.zmq_context.socket(zmq.PULL)
         self.zmq_cmd_socket.setsockopt(zmq.CONFLATE, 1)
@@ -44,17 +46,18 @@ class LeKiwiSim:
         self.watchdog_timeout_ms = config.watchdog_timeout_ms
         self.max_loop_freq_hz = config.max_loop_freq_hz
 
-    def disconnect(self):
+    def disconnect(self) -> None:
+        """Disconnect the ZMQ sockets and context."""
         self.zmq_observation_socket.close()
         self.zmq_cmd_socket.close()
         self.zmq_context.term()
 
 
 def main() -> None:
+    """Main function to run the LeKiwi simulation host."""
     logging.info("Configuring LeKiwi")
-    # robot_config = LeKiwiConfig()
-    # robot = LeKiwiMujoco(robot_config)
-    robot = LeKiwiMujoco()
+    robot_config = LeKiwiMujocoConfig()
+    robot = LeKiwiMujoco(robot_config)
 
     logging.info("Connecting LeKiwi")
     robot.connect()
@@ -69,12 +72,13 @@ def main() -> None:
     try:
         # Business logic
         start = time.perf_counter()
-        duration = 0
-        while duration < host.connection_time_s:
+        while robot.is_connected:
+            # while duration < host.connection_time_s:
             loop_start_time = time.time()
             try:
                 msg = host.zmq_cmd_socket.recv_string(zmq.NOBLOCK)
                 data = dict(json.loads(msg))
+                print("Received command:", data)
                 _action_sent = robot.send_action(data)
                 last_cmd_time = time.time()
                 watchdog_active = False
@@ -114,7 +118,7 @@ def main() -> None:
             elapsed = time.time() - loop_start_time
 
             time.sleep(max(1 / host.max_loop_freq_hz - elapsed, 0))
-            duration = time.perf_counter() - start
+            time.perf_counter() - start
         print("Cycle time reached.")
 
     except KeyboardInterrupt:

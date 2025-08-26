@@ -1,6 +1,10 @@
+"""LeKiwi simulation on MuJoCo."""
+
 import os
-from dataclasses import dataclass
 from importlib import resources
+
+import mujoco
+import mujoco.viewer
 
 
 def get_scene_path() -> str:
@@ -20,9 +24,23 @@ def get_timestep_config() -> float:
     return timestep
 
 
-@dataclass
-class LeKiwiMujocoConfig:
-    """Configuration for the LeKiwi MuJoCo simulation."""
+def main() -> None:
+    """Execute the LeKiwi MuJoCo simulation."""
+    try:
+        mj_model = mujoco.MjModel.from_xml_path(get_scene_path())
+        mj_model.opt.timestep = get_timestep_config()
+        mj_data = mujoco.MjData(mj_model)
+        with mujoco.viewer.launch_passive(mj_model, mj_data) as viewer:
+            while viewer.is_running():
+                mujoco.mj_step(mj_model, mj_data)
+                viewer.sync()
 
-    scene_path: str = get_scene_path()
-    timestep: float = get_timestep_config()
+    except KeyboardInterrupt:
+        print("\nExiting simulation...")
+    except Exception as e:
+        print(f"Simulation error: {e}")
+        raise e
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,19 @@
+[project]
+name = "lekiwi_teleoperate"
+version = "0.1.0"
+description = "Teleoprate the Lekiwi robot using a keyboard."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "lerobot>=0.1.0",
+]
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[dependency-groups]
+dev = ["pytest >=8.1.1", "ruff >=0.9.1"]
+
+[project.scripts]
+lekiwi_teleoperate = "lekiwi_teleoperate.main:main"

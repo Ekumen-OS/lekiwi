@@ -18,4 +18,5 @@ exclude = ["crates*", "target*", "packages*"]
 include = [
   "packages/dummy_package",
   "packages/lekiwi_sim",
+  "packages/lekiwi_teleoperate",
 ]
