@@ -1,4 +1,5 @@
 import time
+import logging
 
 from lerobot.robots.lekiwi import LeKiwiClient, LeKiwiClientConfig
 from lerobot.teleoperators.keyboard.teleop_keyboard import KeyboardTeleop, KeyboardTeleopConfig
@@ -7,6 +8,20 @@ from lerobot.utils.visualization_utils import _init_rerun, log_rerun_data
 
 FPS = 30
 
+COMMANDS_STR = """
+Teleop commands:
+Move:
+      {forward}
+    {left} {backward} {right}
+
+Rotate:
+    clockwise: {rotate_left}
+    counter-clockwise: {rotate_right}
+
+Speed:
+    up: {speed_up}
+    down: {speed_down}
+"""
 
 # TODO(arilow): Add teleoperation of the arm.
 def main() -> None:
@@ -26,6 +41,9 @@ def main() -> None:
 
     if not robot.is_connected or not keyboard.is_connected:
         raise ValueError("Robot, leader arm of keyboard is not connected!")
+
+    logging.info("Robot and keyboard are connected.")
+    print(COMMANDS_STR.format(**robot_config.teleop_keys))
 
     while True:
         t0 = time.perf_counter()
