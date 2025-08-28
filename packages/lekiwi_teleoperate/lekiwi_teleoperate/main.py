@@ -1,5 +1,5 @@
-import time
 import logging
+import time
 
 from lerobot.robots.lekiwi import LeKiwiClient, LeKiwiClientConfig
 from lerobot.teleoperators.keyboard.teleop_keyboard import KeyboardTeleop, KeyboardTeleopConfig
@@ -22,6 +22,7 @@ Speed:
     up: {speed_up}
     down: {speed_down}
 """
+
 
 # TODO(arilow): Add teleoperation of the arm.
 def main() -> None:
