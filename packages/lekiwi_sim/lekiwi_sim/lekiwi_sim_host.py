@@ -24,11 +24,10 @@ import time
 import zmq
 from lerobot.robots.lekiwi.config_lekiwi import LeKiwiHostConfig
 
-from .config_lekiwi_sim import LeKiwiMujocoConfig
-from .lekiwi_mujoco import LeKiwiMujoco
+from .robot import LeKiwiMujoco, LeKiwiMujocoConfig
 
 
-class LeKiwiSim:
+class ZMQHandler:
     """LeKiwi Host agent for simulation."""
 
     def __init__(self, config: LeKiwiHostConfig):
@@ -64,7 +63,7 @@ def main() -> None:
 
     logging.info("Starting HostAgent")
     host_config = LeKiwiHostConfig()
-    host = LeKiwiSim(host_config)
+    host = ZMQHandler(host_config)
 
     last_cmd_time = time.time()
     watchdog_active = False

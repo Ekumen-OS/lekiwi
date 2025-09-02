@@ -2,6 +2,6 @@ Create environment: `uv venv -p 3.11 --seed`
 
 Install: `uv pip install -e .`
 
-Run MuJoCo simulation with LeKiwi integrated with LeRobot: `uv run lekiwi_sim`
+Run MuJoCo simulation host to be accessed via `lerobot.robot.LekiwiClient`: `uv run lekiwi_sim_host`
 
-Run basic MuJoCo simulation with LeKiwi: `uv run basic_lekiwi_sim`
+Run standalone MuJoCo simulation: `uv run standalone_mujoco_sim`

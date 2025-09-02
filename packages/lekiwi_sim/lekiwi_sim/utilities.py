@@ -1,5 +1,4 @@
 import os
-from dataclasses import dataclass
 from importlib import resources
 
 
@@ -18,11 +17,3 @@ def get_timestep_config() -> float:
     except ValueError:
         raise ValueError from ValueError(f"Invalid TIMESTEP value: {timestep}. Must be a float.")
     return timestep
-
-
-@dataclass
-class LeKiwiMujocoConfig:
-    """Configuration for the LeKiwi MuJoCo simulation."""
-
-    scene_path: str = get_scene_path()
-    timestep: float = get_timestep_config()

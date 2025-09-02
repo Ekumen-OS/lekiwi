@@ -15,8 +15,8 @@ Move:
     {left} {backward} {right}
 
 Rotate:
-    clockwise: {rotate_left}
-    counter-clockwise: {rotate_right}
+    clockwise: {rotate_right}
+    counter-clockwise: {rotate_left}
 
 Speed:
     up: {speed_up}

@@ -20,5 +20,5 @@ build-backend = "setuptools.build_meta"
 dev = ["pytest >=8.1.1", "ruff >=0.9.1"]
 
 [project.scripts]
-lekiwi_sim = "lekiwi_sim.main:main"
-basic_lekiwi_sim = "lekiwi_sim.basic_lekiwi_sim:main"
+lekiwi_sim_host = "lekiwi_sim.lekiwi_sim_host:main"
+standalone_mujoco_sim = "lekiwi_sim.standalone_mujoco_sim:main"

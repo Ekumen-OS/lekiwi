@@ -1,5 +1,6 @@
 """LeRobot Robot implementation for MuJoCo simulation with LeKiwi robot"""
 
+from dataclasses import dataclass
 import threading
 from typing import Any
 
@@ -8,7 +9,7 @@ import mujoco.viewer
 import numpy as np
 from lerobot.robots.robot import Robot
 
-from .config_lekiwi_sim import LeKiwiMujocoConfig
+from .utilities import get_scene_path, get_timestep_config
 
 
 class ProtectedLeKiwiMujocoData:
@@ -98,6 +99,13 @@ class ProtectedLeKiwiMujocoObservation:
             "arm_joint_5",
             "arm_joint_6",
         ]
+
+@dataclass
+class LeKiwiMujocoConfig:
+    """Configuration for the LeKiwi MuJoCo simulation."""
+
+    scene_path: str = get_scene_path()
+    timestep: float = get_timestep_config()
 
 
 class LeKiwiMujoco(Robot):
@@ -278,6 +286,8 @@ class LeKiwiMujoco(Robot):
         # TODO(arilow): Implement.
         return
 
+    # TODO(https://github.com/ekumenlabs/lekiwi-dora/pull/11#discussion_r2310632598): Move this
+    # to a kinematics module.
     def _body_to_wheel_rads(
         self,
         x: float,
@@ -353,6 +363,7 @@ class LeKiwiMujoco(Robot):
 
         # Define the wheel mounting angles with a -90° offset.
         angles = np.radians(np.array([240, 0, 120]) - 90)
+        # TODO(https://github.com/ekumenlabs/lekiwi-dora/pull/11#discussion_r2310641980): Review kinematics here.
         m = np.array([[np.cos(a), np.sin(a), base_radius] for a in angles])
 
         # Solve the inverse kinematics: body_velocity = M⁻¹ · wheel_linear_speeds.
