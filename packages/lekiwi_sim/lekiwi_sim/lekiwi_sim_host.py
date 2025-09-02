@@ -55,23 +55,21 @@ class ZMQHandler:
 
 def main() -> None:
     """Main function to run the LeKiwi simulation host."""
-
     parser = argparse.ArgumentParser(
         description="Run the LeKiwi simulation host to be accessed via lerobot.robot.LekiwiClient."
     )
-    
+
     parser.add_argument(
-        '-l', '--level',
-        choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
-        default='INFO',
-        help='Set the logging level (default: INFO). Case-insensitive.'
+        "-l",
+        "--level",
+        choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+        default="INFO",
+        help="Set the logging level (default: INFO). Case-insensitive.",
     )
     args = parser.parse_args()
     log_level = args.level.upper()
     logging.basicConfig(
-        level=log_level,
-        format='%(asctime)s | %(levelname)-8s | %(message)s',
-        datefmt='%Y-%m-%d %H:%M:%S'
+        level=log_level, format="%(asctime)s | %(levelname)-8s | %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
     )
     logging.info("Configuring LeKiwi")
     robot_config = LeKiwiMujocoConfig()

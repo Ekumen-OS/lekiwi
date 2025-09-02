@@ -102,6 +102,7 @@ class ProtectedLeKiwiMujocoObservation:
             "arm_joint_6",
         ]
 
+
 @dataclass
 class LeKiwiMujocoConfig:
     """Configuration for the LeKiwi MuJoCo simulation."""
@@ -141,9 +142,11 @@ class LeKiwiMujoco(Robot):
                     if joint_name.startswith("arm_"):
                         arm_state[f"{joint_name}.pos"] = self.mj_data.joint(joint_name).qpos[0]
 
-                mobile_base_joint_velocities = [self.mj_data.joint("base_left_wheel_joint").qvel[0],
-                                                self.mj_data.joint("base_right_wheel_joint").qvel[0],
-                                                self.mj_data.joint("base_back_wheel_joint").qvel[0]]
+                mobile_base_joint_velocities = [
+                    self.mj_data.joint("base_left_wheel_joint").qvel[0],
+                    self.mj_data.joint("base_right_wheel_joint").qvel[0],
+                    self.mj_data.joint("base_back_wheel_joint").qvel[0],
+                ]
                 mobile_base_velocity = self.mobile_base_kinematics.forward_kinematics(
                     np.array(mobile_base_joint_velocities)
                 )
@@ -152,7 +155,7 @@ class LeKiwiMujoco(Robot):
                     "y.vel": mobile_base_velocity[1],
                     "theta.vel": np.degrees(mobile_base_velocity[2]),
                 }
-  
+
                 self.protected_observation.set_observation({**arm_state, **wheel_state})
 
                 viewer.sync()
@@ -271,11 +274,14 @@ class LeKiwiMujoco(Robot):
         logging.debug("Action received: %s", action)
         base_goal_vel = {k: v for k, v in action.items() if k.endswith(".vel")}
 
-
         base_wheel_goal_vel = self.mobile_base_kinematics.inverse_kinematics(
-            np.array([base_goal_vel.get("x.vel", 0.0),
-                      base_goal_vel.get("y.vel", 0.0),
-                      np.radians(base_goal_vel.get("theta.vel", 0.0))])
+            np.array(
+                [
+                    base_goal_vel.get("x.vel", 0.0),
+                    base_goal_vel.get("y.vel", 0.0),
+                    np.radians(base_goal_vel.get("theta.vel", 0.0)),
+                ]
+            )
         )
 
         self.protected_lekiwi_data.set_base_data(
@@ -285,9 +291,11 @@ class LeKiwiMujoco(Robot):
         )
         logging.debug("Set wheel velocities to: %s", base_wheel_goal_vel)
 
-        return {"base_left_wheel_vel": base_wheel_goal_vel[0],
-                "base_right_wheel_vel": base_wheel_goal_vel[1],
-                "base_back_wheel_vel": base_wheel_goal_vel[2]}
+        return {
+            "base_left_wheel_vel": base_wheel_goal_vel[0],
+            "base_right_wheel_vel": base_wheel_goal_vel[1],
+            "base_back_wheel_vel": base_wheel_goal_vel[2],
+        }
 
     def disconnect(self) -> None:
         """Disconnect from the robot and perform any necessary cleanup."""
