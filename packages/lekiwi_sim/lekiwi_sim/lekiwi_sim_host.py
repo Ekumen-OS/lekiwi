@@ -16,6 +16,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import argparse
 import json
 import logging
 import time
@@ -54,6 +55,24 @@ class ZMQHandler:
 
 def main() -> None:
     """Main function to run the LeKiwi simulation host."""
+
+    parser = argparse.ArgumentParser(
+        description="Run the LeKiwi simulation host to be accessed via lerobot.robot.LekiwiClient."
+    )
+    
+    parser.add_argument(
+        '-l', '--level',
+        choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
+        default='INFO',
+        help='Set the logging level (default: INFO). Case-insensitive.'
+    )
+    args = parser.parse_args()
+    log_level = args.level.upper()
+    logging.basicConfig(
+        level=log_level,
+        format='%(asctime)s | %(levelname)-8s | %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S'
+    )
     logging.info("Configuring LeKiwi")
     robot_config = LeKiwiMujocoConfig()
     robot = LeKiwiMujoco(robot_config)
@@ -77,7 +96,7 @@ def main() -> None:
             try:
                 msg = host.zmq_cmd_socket.recv_string(zmq.NOBLOCK)
                 data = dict(json.loads(msg))
-                print("Received command:", data)
+                logging.debug("Received command: %s", data)
                 _action_sent = robot.send_action(data)
                 last_cmd_time = time.time()
                 watchdog_active = False
@@ -111,7 +130,7 @@ def main() -> None:
             try:
                 host.zmq_observation_socket.send_string(json.dumps(last_observation), flags=zmq.NOBLOCK)
             except zmq.Again:
-                logging.info("Dropping observation, no client connected")
+                logging.debug("Dropping observation, no client connected")
 
             # Ensure a short sleep to avoid overloading the CPU.
             elapsed = time.time() - loop_start_time

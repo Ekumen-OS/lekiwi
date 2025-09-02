@@ -1,7 +1,8 @@
 """LeRobot Robot implementation for MuJoCo simulation with LeKiwi robot"""
 
-from dataclasses import dataclass
+import logging
 import threading
+from dataclasses import dataclass
 from typing import Any
 
 import mujoco
@@ -9,6 +10,7 @@ import mujoco.viewer
 import numpy as np
 from lerobot.robots.robot import Robot
 
+from .kinematics import LeKiwiMobileBase
 from .utilities import get_scene_path, get_timestep_config
 
 
@@ -120,6 +122,7 @@ class LeKiwiMujoco(Robot):
         self.mj_data = mujoco.MjData(self.mj_model)
         self.simulation_thread = threading.Thread(target=self.run_mujoco_loop, daemon=True)
         self.mujoco_is_running = False
+        self.mobile_base_kinematics = LeKiwiMobileBase(wheel_radius=0.05, robot_base_radius=0.125)
 
     def run_mujoco_loop(self) -> None:
         """Run the MuJoCo simulation loop in a separate thread."""
@@ -138,12 +141,18 @@ class LeKiwiMujoco(Robot):
                     if joint_name.startswith("arm_"):
                         arm_state[f"{joint_name}.pos"] = self.mj_data.joint(joint_name).qpos[0]
 
-                wheel_state = self._wheel_rads_to_body(
-                    self.mj_data.joint("base_left_wheel_joint").qvel[0],
-                    self.mj_data.joint("base_back_wheel_joint").qvel[0],
-                    self.mj_data.joint("base_right_wheel_joint").qvel[0],
+                mobile_base_joint_velocities = [self.mj_data.joint("base_left_wheel_joint").qvel[0],
+                                                self.mj_data.joint("base_right_wheel_joint").qvel[0],
+                                                self.mj_data.joint("base_back_wheel_joint").qvel[0]]
+                mobile_base_velocity = self.mobile_base_kinematics.forward_kinematics(
+                    np.array(mobile_base_joint_velocities)
                 )
-
+                wheel_state = {
+                    "x.vel": mobile_base_velocity[0],
+                    "y.vel": mobile_base_velocity[1],
+                    "theta.vel": np.degrees(mobile_base_velocity[2]),
+                }
+  
                 self.protected_observation.set_observation({**arm_state, **wheel_state})
 
                 viewer.sync()
@@ -259,21 +268,26 @@ class LeKiwiMujoco(Robot):
                 safety limits on velocity.
 
         """
-        print("Action received:", action)
+        logging.debug("Action received: %s", action)
         base_goal_vel = {k: v for k, v in action.items() if k.endswith(".vel")}
 
-        base_wheel_goal_vel = self._body_to_wheel_rads(
-            base_goal_vel["x.vel"], base_goal_vel["y.vel"], base_goal_vel["theta.vel"]
+
+        base_wheel_goal_vel = self.mobile_base_kinematics.inverse_kinematics(
+            np.array([base_goal_vel.get("x.vel", 0.0),
+                      base_goal_vel.get("y.vel", 0.0),
+                      np.radians(base_goal_vel.get("theta.vel", 0.0))])
         )
 
         self.protected_lekiwi_data.set_base_data(
-            base_wheel_goal_vel["base_left_wheel"],
-            base_wheel_goal_vel["base_back_wheel"],
-            base_wheel_goal_vel["base_right_wheel"],
+            base_left_wheel_vel=base_wheel_goal_vel[0],
+            base_right_wheel_vel=base_wheel_goal_vel[1],
+            base_back_wheel_vel=base_wheel_goal_vel[2],
         )
-        print("Wheels vel:", base_wheel_goal_vel)
+        logging.debug("Set wheel velocities to: %s", base_wheel_goal_vel)
 
-        return base_wheel_goal_vel
+        return {"base_left_wheel_vel": base_wheel_goal_vel[0],
+                "base_right_wheel_vel": base_wheel_goal_vel[1],
+                "base_back_wheel_vel": base_wheel_goal_vel[2]}
 
     def disconnect(self) -> None:
         """Disconnect from the robot and perform any necessary cleanup."""
@@ -285,94 +299,3 @@ class LeKiwiMujoco(Robot):
         """Stop the robot's base movement immediately."""
         # TODO(arilow): Implement.
         return
-
-    # TODO(https://github.com/ekumenlabs/lekiwi-dora/pull/11#discussion_r2310632598): Move this
-    # to a kinematics module.
-    def _body_to_wheel_rads(
-        self,
-        x: float,
-        y: float,
-        theta: float,
-        wheel_radius: float = 0.05,
-        base_radius: float = 0.125,
-        max_raw: int = 3000,
-    ) -> dict[str, float]:
-        """Convert desired body-frame velocities into wheel raw commands.
-
-        Args:
-          x      : Linear velocity in x (m/s).
-          y      : Linear velocity in y (m/s).
-          theta  : Rotational velocity (deg/s).
-          wheel_radius: Radius of each wheel (meters).
-          base_radius : Distance from the center of rotation to each wheel (meters).
-          max_raw    : Maximum allowed raw command (ticks) per wheel.
-
-        Returns:
-          A dictionary with wheels angular speeds in rad/s as:
-             {"base_left_wheel": value, "base_back_wheel": value, "base_right_wheel": value}.
-
-        """
-        # Convert rotational velocity from deg/s to rad/s.
-        theta_rad = theta * (np.pi / 180.0)
-
-        # Create the body velocity vector [x, y, theta_rad].
-        velocity_vector = np.array([x, y, theta_rad])
-
-        # Define the wheel mounting angles with a -90° offset.
-        angles = np.radians(np.array([240, 0, 120]) - 90)
-        # Build the kinematic matrix: each row maps body velocities to a wheel's linear speed.
-        # The third column (base_radius) accounts for the effect of rotation.
-        m = np.array([[np.cos(a), np.sin(a), base_radius] for a in angles])
-
-        # Compute each wheel's linear speed (m/s) and then its angular speed (rad/s).
-        wheel_linear_speeds = m.dot(velocity_vector)
-        wheel_angular_speeds = wheel_linear_speeds / wheel_radius
-
-        # TODO(arilow): Find out why the wheels need to be inverted.
-        corrected_wheel_angular_speeds = -wheel_angular_speeds
-        return {
-            "base_left_wheel": corrected_wheel_angular_speeds[0],
-            "base_back_wheel": corrected_wheel_angular_speeds[1],
-            "base_right_wheel": corrected_wheel_angular_speeds[2],
-        }
-
-    def _wheel_rads_to_body(
-        self,
-        left_wheel_speed: float,
-        back_wheel_speed: float,
-        right_wheel_speed: float,
-        wheel_radius: float = 0.05,
-        base_radius: float = 0.125,
-    ) -> dict[str, Any]:
-        """Convert wheel raw command feedback back into body-frame velocities.
-
-        Args:
-        left_wheel_speed    : Left wheel velocity in rad/s
-        back_wheel_speed    : Back wheel velocity in rad/s
-        right_wheel_speed   : Right wheel velocity in rad/s
-        wheel_radius: Radius of each wheel (meters).
-        base_radius : Distance from the robot center to each wheel (meters).
-
-        Returns:
-        A dict (x.vel, y.vel, theta.vel) all in m/s
-
-        """
-        wheel_radps = np.array([left_wheel_speed, back_wheel_speed, right_wheel_speed])
-        # Compute each wheel's linear speed (m/s) from its angular speed.
-        wheel_linear_speeds = wheel_radps * wheel_radius
-
-        # Define the wheel mounting angles with a -90° offset.
-        angles = np.radians(np.array([240, 0, 120]) - 90)
-        # TODO(https://github.com/ekumenlabs/lekiwi-dora/pull/11#discussion_r2310641980): Review kinematics here.
-        m = np.array([[np.cos(a), np.sin(a), base_radius] for a in angles])
-
-        # Solve the inverse kinematics: body_velocity = M⁻¹ · wheel_linear_speeds.
-        m_inv = np.linalg.inv(m)
-        velocity_vector = m_inv.dot(wheel_linear_speeds)
-        x, y, theta_rad = velocity_vector
-        theta = theta_rad * (180.0 / np.pi)
-        return {
-            "x.vel": x,
-            "y.vel": y,
-            "theta.vel": theta,
-        }  # m/s and deg/s
