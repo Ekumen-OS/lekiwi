@@ -9,7 +9,7 @@ import mujoco.viewer
 
 def get_scene_path() -> str:
     """Get the path to the MuJoCo scene file."""
-    scene_path = resources.files("lekiwi_sim").joinpath("assets/mjcf_lcmm_robot.xml")
+    scene_path = resources.files("lekiwi_sim").joinpath("assets/scene.xml")
     if not scene_path.is_file():
         raise FileNotFoundError(f"Scene file not found at {scene_path}. Please ensure the assets directory is present.")
     return str(scene_path)

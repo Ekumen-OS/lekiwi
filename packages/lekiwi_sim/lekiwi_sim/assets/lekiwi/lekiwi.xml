@@ -1,0 +1,92 @@
+<mujoco model="lekiwi">
+    <compiler angle="radian" />
+    <asset>
+        <mesh name="base_plate" file="meshes/base_plate.stl" scale="0.001 0.001 0.001"/>
+        <mesh name="drive_motor_mount" file="meshes/drive_motor_mount.stl" scale="0.001 0.001 0.001" />
+        <mesh name="servo_motor" file="meshes/servo_motor.stl" scale="0.001 0.001 0.001" />
+        <mesh name="wheel_hub" file="meshes/wheel_hub.stl" scale="0.001 0.001 0.001" />
+        <mesh name="wheel" file="meshes/wheel.stl" scale="0.001 0.001 0.001" />
+    </asset>
+
+    <default>
+        <default class="drive_motor_mount">
+            <geom type="mesh" mesh="drive_motor_mount" pos="0 0 0" euler="0 0 0" />
+        </default>
+        <default class="servo_motor">
+            <geom type="mesh" mesh="servo_motor" pos="0 0 0" euler="0 0 0" />
+        </default>
+        <default class="wheel_hub">
+            <geom type="mesh" mesh="wheel_hub" pos="0 0 0" euler="0 0 0" />
+            <joint type="hinge" axis="0.0 0.0 1.0" pos="0.0 0.0 0.0" />
+        </default>
+        <default class="wheel">
+            <geom type="mesh" mesh="wheel" pos="0 0 0" euler="0 0 0" />
+        </default>
+    </default>
+
+    <actuator>
+        <!-- Base drive motors -->
+        <velocity name="base_left_wheel" joint="base_left_wheel_joint" kv="1" ctrllimited="false"/>
+        <velocity name="base_right_wheel" joint="base_right_wheel_joint" kv="1" ctrllimited="false"/>
+        <velocity name="base_back_wheel" joint="base_back_wheel_joint" kv="1" ctrllimited="false"/>
+    </actuator>
+
+    <worldbody>
+        <body name="base_plate_layer_1_link" pos="0.0 0.0 0.0" euler="0.0 0.0 0.0">
+            <joint type="free"/>
+            <inertial mass="1.9468624348344596" pos="-4.730687660675253e-15 -2.7155537377808555e-05 -0.0035000000000000005" fullinertia="0.005637109888809055 0.005628440956780792 0.0112496514690387 1.3447333053523504e-16 1.7848833522297417e-20 2.6469779601696886e-23" />
+            <geom type="mesh" mesh="base_plate" pos="0 0 0" euler="0 0 -1.5708" />
+            <body name="drive_motor_mount_back_link" pos="-0.09 0.02061 0.002" euler="0 0 -3.14159">
+                <geom class="drive_motor_mount"/>
+                <inertial mass="0.035884017191401885" pos="0.00017900181977195112 -0.0006914486154622601 0.0004348187449640745" fullinertia="3.2235542654871883e-06 3.901284246443171e-06 6.890721819180175e-06 -1.4488185386067676e-08 -3.4701845947883736e-08 1.0877684749210782e-07" />
+                <body name="servo_motor_back_link" pos="0.0096 -0.00489 0.01436" euler="0 0 -1.5708">
+                    <geom class="servo_motor"/>
+                    <inertial mass="0.0658962961901927" pos="-0.014664257020729004 -0.008722816656342332 1.2191853053420506e-06" fullinertia="1.0300908387946657e-05 1.3913691655689984e-05 1.8215748982019662e-05 1.1951581712694353e-07 -1.7998869276644268e-09 8.88550145137008e-10" />
+                    <body name="wheel_hub_back_link" pos="-0.0255 0.0111875 0" euler="-1.5708 0 3.14159">
+                        <joint name="base_back_wheel_joint" class="wheel_hub" />
+                        <geom class="wheel_hub"/>
+                        <inertial mass="0.08665496109754897" pos="8.50877658112488e-09 7.358945011137765e-09 0.0023811166424899887" fullinertia="1.2296291761641504e-05 1.2296276073121143e-05 2.2911778015411222e-05 -3.19167294920219e-12 1.755992026942528e-12 1.5186622033709633e-12" />
+                        <body name="wheel_back_link" pos="0 0 0.01746" euler="-3.14159 0 -0.2618">
+                            <geom class="wheel"/>
+                            <inertial mass="1.3542854082324305" pos="-7.105207895657716e-08 -1.1369917947312704e-07 -1.2090586078983279e-08" fullinertia="0.0010936200374455458 0.0010936108480286116 0.0018798127501507855 -5.245142023675448e-09 4.046730352778215e-10 1.0004485488405523e-10" />
+                        </body>
+                    </body>
+                </body>
+            </body>
+            <body name="drive_motor_mount_right_link" pos="0.02715 -0.08825 0.002" euler="0 0 -1.0472">
+                <geom class="drive_motor_mount"/>
+                <inertial mass="0.035884017191401885" pos="0.00017900181977195112 -0.0006914486154622601 0.0004348187449640745" fullinertia="3.2235542654871883e-06 3.901284246443171e-06 6.890721819180175e-06 -1.4488185386067676e-08 -3.4701845947883736e-08 1.0877684749210782e-07" />
+                <body name="servo_motor_right_link" pos="0.0096 -0.00489 0.01436" euler="0 0 -1.5708">
+                    <geom class="servo_motor"/>
+                    <inertial mass="0.0658962961901927" pos="-0.014664257020729004 -0.008722816656342332 1.2191853053420506e-06" fullinertia="1.0300908387946657e-05 1.3913691655689984e-05 1.8215748982019662e-05 1.1951581712694353e-07 -1.7998869276644268e-09 8.88550145137008e-10" />
+                    <body name="wheel_hub_right_link" pos="-0.0255 0.0111875 0" euler="-1.5708 0 3.14159">
+                        <joint name="base_right_wheel_joint" class="wheel_hub" />
+                        <geom class="wheel_hub"/>
+                        <inertial mass="0.08665496109754897" pos="8.50877658112488e-09 7.358945011137765e-09 0.0023811166424899887" fullinertia="1.2296291761641504e-05 1.2296276073121143e-05 2.2911778015411222e-05 -3.19167294920219e-12 1.755992026942528e-12 1.5186622033709633e-12" />
+                        <body name="wheel_right_link" pos="0 0 0.01746" euler="-3.14159 0 -0.2618">
+                            <geom class="wheel"/>
+                            <inertial mass="1.3542854082324305" pos="-7.105207895657716e-08 -1.1369917947312704e-07 -1.2090586078983279e-08" fullinertia="0.0010936200374455458 0.0010936108480286116 0.0018798127501507855 -5.245142023675448e-09 4.046730352778215e-10 1.0004485488405523e-10" />
+                        </body>
+                    </body>
+                </body>
+            </body>
+            <body name="drive_motor_mount_left_link" pos="0.06284878357844971 0.06763728633687423 0.0020000000000000018" euler="0.0 0.0 1.0472">
+                <geom class="drive_motor_mount"/>
+                <inertial mass="0.035884017191401885" pos="0.00017900181977195112 -0.0006914486154622601 0.0004348187449640745" fullinertia="3.2235542654871883e-06 3.901284246443171e-06 6.890721819180175e-06 -1.4488185386067676e-08 -3.4701845947883736e-08 1.0877684749210782e-07" />
+                <body name="servo_motor_left_link" pos="0.0096 -0.00489 0.01436" euler="0 0 -1.5708">
+                    <geom class="servo_motor"/>
+                    <inertial mass="0.0658962961901927" pos="-0.014664257020729004 -0.008722816656342332 1.2191853053420506e-06" fullinertia="1.0300908387946657e-05 1.3913691655689984e-05 1.8215748982019662e-05 1.1951581712694353e-07 -1.7998869276644268e-09 8.88550145137008e-10" />
+                    <body name="wheel_hub_left_link" pos="-0.0255 0.0111875 0" euler="-1.5708 0 3.14159">
+                        <joint name="base_left_wheel_joint" class="wheel_hub" />
+                        <geom class="wheel_hub"/>
+                        <inertial mass="0.08665496109754897" pos="8.50877658112488e-09 7.358945011137765e-09 0.0023811166424899887" fullinertia="1.2296291761641504e-05 1.2296276073121143e-05 2.2911778015411222e-05 -3.19167294920219e-12 1.755992026942528e-12 1.5186622033709633e-12" />
+                        <body name="wheel_left_link" pos="0 0 0.01746" euler="-3.14159 0 -0.2618">
+                            <geom class="wheel"/>
+                            <inertial mass="1.3542854082324305" pos="-7.105207895657716e-08 -1.1369917947312704e-07 -1.2090586078983279e-08" fullinertia="0.0010936200374455458 0.0010936108480286116 0.0018798127501507855 -5.245142023675448e-09 4.046730352778215e-10 1.0004485488405523e-10" />
+                        </body>
+                    </body>
+                </body>
+            </body>
+        </body>
+    </worldbody>
+</mujoco>
