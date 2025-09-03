@@ -3,6 +3,8 @@
     <asset>
         <mesh name="base_plate" file="meshes/base_plate.stl" scale="0.001 0.001 0.001"/>
         <mesh name="battery" file="meshes/battery.stl" scale="0.001 0.001 0.001" />
+        <mesh name="camera" file="meshes/camera.stl" scale="0.001 0.001 0.001" />
+        <mesh name="camera_mount" file="meshes/camera_mount.stl" scale="0.001 0.001 0.001" />
         <mesh name="drive_motor_mount" file="meshes/drive_motor_mount.stl" scale="0.001 0.001 0.001" />
         <mesh name="hex_standoff" file="meshes/hex_standoff.stl" scale="0.001 0.001 0.001" />
         <mesh name="lipo_battery_mount" file="meshes/lipo_battery_mount.stl" scale="0.001 0.001 0.001" />
@@ -12,6 +14,7 @@
         <mesh name="servo_motor" file="meshes/servo_motor.stl" scale="0.001 0.001 0.001" />
         <mesh name="wheel" file="meshes/wheel.stl" scale="0.001 0.001 0.001" />
         <mesh name="wheel_hub" file="meshes/wheel_hub.stl" scale="0.001 0.001 0.001" />
+        <model name="so_arm100" file="../so_arm100/so_arm100.xml" />
     </asset>
 
     <default>
@@ -26,22 +29,21 @@
             <joint type="hinge" axis="0.0 0.0 1.0" pos="0.0 0.0 0.0" />
         </default>
         <default class="wheel">
-            <geom type="mesh" mesh="wheel" pos="0 0 0" euler="0 0 0" />
+            <geom type="mesh" mesh="wheel" pos="0 0 0" euler="0 0 0" material="white" friction="1 0.005 0.0001" />
         </default>
     </default>
 
     <actuator>
-        <!-- Base drive motors -->
-        <velocity name="base_left_wheel" joint="base_left_wheel_joint" kv="1" ctrllimited="false"/>
-        <velocity name="base_right_wheel" joint="base_right_wheel_joint" kv="1" ctrllimited="false"/>
-        <velocity name="base_back_wheel" joint="base_back_wheel_joint" kv="1" ctrllimited="false"/>
+        <velocity name="base_left_wheel" joint="base_left_wheel_joint" kv="1" ctrlrange="-3.14 3.14"/>
+        <velocity name="base_right_wheel" joint="base_right_wheel_joint" kv="1" ctrlrange="-3.14 3.14"/>
+        <velocity name="base_back_wheel" joint="base_back_wheel_joint" kv="1"  ctrlrange="-3.14 3.14"/>
     </actuator>
 
     <worldbody>
         <body name="base_plate_layer_1_link" pos="0.0 0.0 0.0" euler="0.0 0.0 0.0">
             <joint type="free"/>
-            <inertial mass="1.9468624348344596" pos="-4.730687660675253e-15 -2.7155537377808555e-05 -0.0035000000000000005" fullinertia="0.005637109888809055 0.005628440956780792 0.0112496514690387 1.3447333053523504e-16 1.7848833522297417e-20 2.6469779601696886e-23" />
-            <geom type="mesh" mesh="base_plate" pos="0 0 0" euler="0 0 -1.5708" />
+            <inertial mass="0.2" pos="0 0 0" />
+            <geom type="mesh" mesh="base_plate" material="black" pos="0 0 0" euler="0 0 -1.5708" />
             <body name="drive_motor_mount_back_link" pos="-0.09 0.02061 0.002" euler="0 0 -3.14159">
                 <geom class="drive_motor_mount"/>
                 <inertial mass="0.035884017191401885" pos="0.00017900181977195112 -0.0006914486154622601 0.0004348187449640745" fullinertia="3.2235542654871883e-06 3.901284246443171e-06 6.890721819180175e-06 -1.4488185386067676e-08 -3.4701845947883736e-08 1.0877684749210782e-07" />
@@ -105,6 +107,19 @@
                     <inertial mass="1.2215469988184764" pos="0.020000000000000018 -8.300646300726007e-05 -0.03492202423172039" fullinertia="0.0008162228074590446 0.00065975897252246 0.00047597821218279645 1.3010426069826053e-18 4.3368086899420163e-19 3.135378714781114e-06" />
                 </body>
             </body>
+            <body name="camera_mount_link" pos="0.1 0.0 0.0" euler="0.0 0.0 0.0">
+                <geom type="mesh" mesh="camera_mount" pos="0 0 0" euler="0 0 0" />
+                <inertial mass="0.09147094298688183" pos="0.0030289224720198397 0.00011242904514014542 0.02064739422580405" fullinertia="3.4924657273467044e-05 1.7958936503269972e-05 1.8461671554877027e-05 -2.8535574628355763e-08 1.483173255618039e-06 1.1115307183257866e-07" />
+                <body name="camera_link" pos="0.005843306737767851 0 0.02401122309705938" euler="0.0 1.37 0.0">
+                    <geom type="mesh" mesh="camera" pos="0 0 0" euler="0 0 0" />
+                    <inertial mass="0.039920058315088616" pos="0.00011860470791938802 0.00023881874959842783 0.004326318838629241" fullinertia="5.219349028990072e-06 5.305573488496055e-06 7.674281395938296e-06 6.564111916115197e-08 1.3381791184156136e-08 2.6971366213773554e-08" />
+                    <camera name="base_cam" mode="fixed" resolution="640 480" fovy="70" pos="0.05 0 0" euler="0 3.14 -1.57" />
+                </body>
+            </body>
+            <body name="hex_standoff_center_link" pos="0 0 0.025" euler="0.0 0.0 -0.0">
+                <geom type="mesh" mesh="hex_standoff" pos="0 0 0" euler="0 0 0" />
+                <inertial mass="0.006150070863406618" pos="2.1866952693017084e-14 -1.2010287431252216e-09 -6.6970201384464195e-09" fullinertia="1.0965196650850481e-06 1.0965196548945726e-06 1.8373964931137077e-08 3.3881317890172236e-20 2.698646969952201e-18 -9.149560204254155e-14" />
+            </body>
             <body name="hex_standoff_1_link" pos="0.03267949192431126 0.09660254037844385 0.025" euler="0.0 0.0 -0.0">
                 <geom type="mesh" mesh="hex_standoff" pos="0 0 0" euler="0 0 0" />
                 <inertial mass="0.006150070863406618" pos="2.1866952693017084e-14 -1.2010287431252216e-09 -6.6970201384464195e-09" fullinertia="1.0965196650850481e-06 1.0965196548945726e-06 1.8373964931137077e-08 3.3881317890172236e-20 2.698646969952201e-18 -9.149560204254155e-14" />
@@ -118,8 +133,8 @@
                 <inertial mass="0.006150070863406618" pos="2.1866952693017084e-14 -1.2010287342434374e-09 -6.6970201384464195e-09" fullinertia="1.096519665085043e-06 1.0965196548945862e-06 1.8373964931164182e-08 2.7105054312137834e-20 2.6969529040576923e-18 -9.149559950144271e-14" />
             </body>
             <body name="base_plate_layer_2_link" pos="0.0 0.0 0.057" euler="-0.0 0.0 -0.0">
-                <geom type="mesh" mesh="base_plate" pos="0 0 0" euler="0 0 -1.5708" />
-                <inertial mass="1.9468624348344596" pos="-4.730687660675253e-15 -2.7155537377808555e-05 -0.0034999999999999966" fullinertia="0.0056371098888090545 0.005628440956780792 0.0112496514690387 1.3447333053523506e-16 1.7848833522266602e-20 0.0" />
+                <geom type="mesh" mesh="base_plate" material="black" pos="0 0 0" euler="0 0 -1.5708" />
+                <inertial mass="0.2" pos="0 0 0" />
                 <body name="sbc_case_bottom_link" pos="-0.064 0 0" euler="0.0 0.0 1.5708">
                     <geom type="mesh" mesh="sbc_case_bottom" pos="0 0 0" euler="0 0 0" />
                     <inertial mass="0.14588862570926195" pos="-0.00162379917481353 0.0017514442972537737 0.0028600223736592917" fullinertia="5.861212367196976e-05 0.000126485904877694 0.00018209683987627657 1.504419769130799e-06 2.5907710844293906e-06 -7.708271472892189e-07" />
@@ -127,6 +142,9 @@
                         <geom type="mesh" mesh="sbc_case_top" pos="0 0 0" euler="0 0 0" />
                         <inertial mass="0.1256590419653392" pos="-0.0036436981408919968 -0.0003259633563240798 0.004946871759115404" fullinertia="5.8982381320791524e-05 0.00013338786905954623 0.00018586375094365218 1.6170683703385845e-07 2.7949770042390678e-06 -5.073018525688329e-07" />
                     </body>
+                </body>
+                <body name="so_arm100_link" pos="0.022 0 0" euler="0 0 1.5708">
+                  <attach model="so_arm100" body="Base" prefix=""/>
                 </body>
             </body>
         </body>
