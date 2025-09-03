@@ -92,14 +92,14 @@ class ProtectedLeKiwiMujocoObservation:
         """
         return [
             "base_left_wheel_joint",
-            "base_back_wheel_joint",
             "base_right_wheel_joint",
-            "arm_joint_1",
-            "arm_joint_2",
-            "arm_joint_3",
-            "arm_joint_4",
-            "arm_joint_5",
-            "arm_joint_6",
+            "base_back_wheel_joint",
+            "Rotation",
+            "Pitch",
+            "Elbow",
+            "Wrist_Pitch",
+            "Wrist_Roll",
+            "Jaw",
         ]
 
 
