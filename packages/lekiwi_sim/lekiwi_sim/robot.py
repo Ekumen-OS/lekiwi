@@ -20,6 +20,17 @@ class ProtectedLeKiwiMujocoData:
 
     def __init__(self) -> None:
         """Initialize the protected data with default values."""
+        self.data = {
+            "base_left_wheel_vel": 0.0,
+            "base_back_wheel_vel": 0.0,
+            "base_right_wheel_vel": 0.0,
+            "shoulder_pan_joint_pos": 0.0,
+            "shoulder_lift_joint_pos": 0.0,
+            "elbow_flex_joint_pos": 0.0,
+            "wrist_flex_joint_pos": 0.0,
+            "wrist_roll_joint_pos": 0.0,
+            "jaw_joint_pos": 0.0,
+        }
         self.base_left_wheel_vel = 0.0
         self.base_back_wheel_vel = 0.0
         self.base_right_wheel_vel = 0.0
@@ -39,17 +50,7 @@ class ProtectedLeKiwiMujocoData:
 
         """
         with self.lock:
-            return {
-                "base_left_wheel_vel": self.base_left_wheel_vel,
-                "base_back_wheel_vel": self.base_back_wheel_vel,
-                "base_right_wheel_vel": self.base_right_wheel_vel,
-                "shoulder_pan_joint_pos": self.shoulder_pan_joint_pos,
-                "shoulder_lift_joint_pos": self.shoulder_lift_joint_pos,
-                "elbow_flex_joint_pos": self.elbow_flex_joint_pos,
-                "wrist_flex_joint_pos": self.wrist_flex_joint_pos,
-                "wrist_roll_joint_pos": self.wrist_roll_joint_pos,
-                "jaw_joint_pos": self.jaw_joint_pos,
-            }
+            return self.data.copy()
 
     def set_action_data(
         self,
@@ -62,7 +63,7 @@ class ProtectedLeKiwiMujocoData:
         wrist_flex_joint_pos: float,
         wrist_roll_joint_pos: float,
         jaw_joint_pos: float,
-    ) -> None:
+    ) -> dict[str, float]:
         """Set the base wheel velocities.
 
         Args:
@@ -78,15 +79,16 @@ class ProtectedLeKiwiMujocoData:
 
         """
         with self.lock:
-            self.base_left_wheel_vel = base_left_wheel_vel
-            self.base_back_wheel_vel = base_back_wheel_vel
-            self.base_right_wheel_vel = base_right_wheel_vel
-            self.shoulder_pan_joint_pos = shoulder_pan_joint_pos
-            self.shoulder_lift_joint_pos = shoulder_lift_joint_pos
-            self.elbow_flex_joint_pos = elbow_flex_joint_pos
-            self.wrist_flex_joint_pos = wrist_flex_joint_pos
-            self.wrist_roll_joint_pos = wrist_roll_joint_pos
-            self.jaw_joint_pos = jaw_joint_pos
+            self.data["base_left_wheel_vel"] = base_left_wheel_vel
+            self.data["base_back_wheel_vel"] = base_back_wheel_vel
+            self.data["base_right_wheel_vel"] = base_right_wheel_vel
+            self.data["shoulder_pan_joint_pos"] = shoulder_pan_joint_pos
+            self.data["shoulder_lift_joint_pos"] = shoulder_lift_joint_pos
+            self.data["elbow_flex_joint_pos"] = elbow_flex_joint_pos
+            self.data["wrist_flex_joint_pos"] = wrist_flex_joint_pos
+            self.data["wrist_roll_joint_pos"] = wrist_roll_joint_pos
+            self.data["jaw_joint_pos"] = jaw_joint_pos
+            return self.data.copy()
 
 
 class ProtectedLeKiwiMujocoObservation:
@@ -346,7 +348,7 @@ class LeKiwiMujoco(Robot):
             )
         )
 
-        self.protected_lekiwi_data.set_action_data(
+        return self.protected_lekiwi_data.set_action_data(
             base_left_wheel_vel=base_wheel_goal_vel[0],
             base_right_wheel_vel=base_wheel_goal_vel[1],
             base_back_wheel_vel=base_wheel_goal_vel[2],
@@ -357,12 +359,6 @@ class LeKiwiMujoco(Robot):
             wrist_roll_joint_pos=np.radians(action.get("arm_wrist_roll.pos", 0.0)),
             jaw_joint_pos=action.get("arm_gripper.pos", 0.0),
         )
-
-        return {
-            "base_left_wheel_vel": base_wheel_goal_vel[0],
-            "base_right_wheel_vel": base_wheel_goal_vel[1],
-            "base_back_wheel_vel": base_wheel_goal_vel[2],
-        }
 
     def disconnect(self) -> None:
         """Disconnect from the robot and perform any necessary cleanup."""
