@@ -2,12 +2,13 @@
 
 import logging
 import threading
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 
 import mujoco
 import mujoco.viewer
 import numpy as np
+from lerobot.cameras.configs import CameraConfig
 from lerobot.robots.robot import Robot
 
 from .kinematics import LeKiwiMobileBase
@@ -22,9 +23,15 @@ class ProtectedLeKiwiMujocoData:
         self.base_left_wheel_vel = 0.0
         self.base_back_wheel_vel = 0.0
         self.base_right_wheel_vel = 0.0
+        self.shoulder_pan_joint_pos = 0.0
+        self.shoulder_lift_joint_pos = 0.0
+        self.elbow_flex_joint_pos = 0.0
+        self.wrist_flex_joint_pos = 0.0
+        self.wrist_roll_joint_pos = 0.0
+        self.jaw_joint_pos = 0.0
         self.lock = threading.Lock()
 
-    def get_base_data(self) -> dict[str, float]:
+    def get_action_data(self) -> dict[str, float]:
         """Get the current base wheel velocities.
 
         Returns:
@@ -36,10 +43,25 @@ class ProtectedLeKiwiMujocoData:
                 "base_left_wheel_vel": self.base_left_wheel_vel,
                 "base_back_wheel_vel": self.base_back_wheel_vel,
                 "base_right_wheel_vel": self.base_right_wheel_vel,
+                "shoulder_pan_joint_pos": self.shoulder_pan_joint_pos,
+                "shoulder_lift_joint_pos": self.shoulder_lift_joint_pos,
+                "elbow_flex_joint_pos": self.elbow_flex_joint_pos,
+                "wrist_flex_joint_pos": self.wrist_flex_joint_pos,
+                "wrist_roll_joint_pos": self.wrist_roll_joint_pos,
+                "jaw_joint_pos": self.jaw_joint_pos,
             }
 
-    def set_base_data(
-        self, base_left_wheel_vel: float, base_back_wheel_vel: float, base_right_wheel_vel: float
+    def set_action_data(
+        self,
+        base_left_wheel_vel: float,
+        base_back_wheel_vel: float,
+        base_right_wheel_vel: float,
+        shoulder_pan_joint_pos: float,
+        shoulder_lift_joint_pos: float,
+        elbow_flex_joint_pos: float,
+        wrist_flex_joint_pos: float,
+        wrist_roll_joint_pos: float,
+        jaw_joint_pos: float,
     ) -> None:
         """Set the base wheel velocities.
 
@@ -47,12 +69,24 @@ class ProtectedLeKiwiMujocoData:
             base_left_wheel_vel (float): Velocity for the left wheel.
             base_back_wheel_vel (float): Velocity for the back wheel.
             base_right_wheel_vel (float): Velocity for the right wheel.
+            shoulder_pan_joint_pos (float): Position for the shoulder pan joint.
+            shoulder_lift_joint_pos (float): Position for the shoulder lift joint.
+            elbow_flex_joint_pos (float): Position for the elbow flex joint.
+            wrist_flex_joint_pos (float): Position for the wrist flex joint.
+            wrist_roll_joint_pos (float): Position for the wrist roll joint.
+            jaw_joint_pos (float): Position for the jaw joint.
 
         """
         with self.lock:
             self.base_left_wheel_vel = base_left_wheel_vel
             self.base_back_wheel_vel = base_back_wheel_vel
             self.base_right_wheel_vel = base_right_wheel_vel
+            self.shoulder_pan_joint_pos = shoulder_pan_joint_pos
+            self.shoulder_lift_joint_pos = shoulder_lift_joint_pos
+            self.elbow_flex_joint_pos = elbow_flex_joint_pos
+            self.wrist_flex_joint_pos = wrist_flex_joint_pos
+            self.wrist_roll_joint_pos = wrist_roll_joint_pos
+            self.jaw_joint_pos = jaw_joint_pos
 
 
 class ProtectedLeKiwiMujocoObservation:
@@ -83,24 +117,26 @@ class ProtectedLeKiwiMujocoObservation:
         with self.lock:
             self.observation = observation.copy()
 
-    def get_observed_joints(self) -> list[str]:
-        """Return a list of joint names that are observed.
 
-        Returns:
-            list[str]: A list of joint names.
+def lekiwi_mujoco_cameras_config() -> dict[str, CameraConfig]:
+    """Define the camera configurations for the LeKiwi MuJoCo simulation.
 
-        """
-        return [
-            "base_left_wheel_joint",
-            "base_right_wheel_joint",
-            "base_back_wheel_joint",
-            "Rotation",
-            "Pitch",
-            "Elbow",
-            "Wrist_Pitch",
-            "Wrist_Roll",
-            "Jaw",
-        ]
+    Returns:
+        dict: A dictionary with camera names as keys and CameraConfig objects as values.
+
+    """
+    return {
+        "front": CameraConfig(
+            fps=10,
+            width=640,
+            height=480,
+        ),
+        "wrist": CameraConfig(
+            fps=10,
+            width=640,
+            height=480,
+        ),
+    }
 
 
 @dataclass
@@ -109,6 +145,7 @@ class LeKiwiMujocoConfig:
 
     scene_path: str = get_scene_path()
     timestep: float = get_timestep_config()
+    cameras: dict[str, CameraConfig] = field(default_factory=lekiwi_mujoco_cameras_config)
 
 
 class LeKiwiMujoco(Robot):
@@ -124,24 +161,57 @@ class LeKiwiMujoco(Robot):
         self.simulation_thread = threading.Thread(target=self.run_mujoco_loop, daemon=True)
         self.mujoco_is_running = False
         self.mobile_base_kinematics = LeKiwiMobileBase(wheel_radius=0.05, robot_base_radius=0.125)
+        self.config = config
+        self.cameras = config.cameras
+
+    @property
+    def _state_ft(self) -> dict[str, type]:
+        return dict.fromkeys(
+            (
+                "arm_shoulder_pan.pos",
+                "arm_shoulder_lift.pos",
+                "arm_elbow_flex.pos",
+                "arm_wrist_flex.pos",
+                "arm_wrist_roll.pos",
+                "arm_gripper.pos",
+                "x.vel",
+                "y.vel",
+                "theta.vel",
+            ),
+            float,
+        )
+
+    @property
+    def _cameras_ft(self) -> dict[str, tuple]:  # type: ignore
+        return {cam: (self.config.cameras[cam].height, self.config.cameras[cam].width, 3) for cam in self.cameras}
+
+    @property
+    def observation_features(self) -> dict[str, type | tuple]:  # type: ignore
+        """A dictionary describing the structure and types of the observations provided by the robot."""
+        return {**self._state_ft, **self._cameras_ft}
 
     def run_mujoco_loop(self) -> None:
         """Run the MuJoCo simulation loop in a separate thread."""
         with mujoco.viewer.launch_passive(self.mj_model, self.mj_data) as viewer:
             while viewer.is_running() and self.mujoco_is_running:
-                base_data = self.protected_lekiwi_data.get_base_data()
-                self.mj_data.actuator("base_back_wheel").ctrl[0] = base_data["base_back_wheel_vel"]
-                self.mj_data.actuator("base_right_wheel").ctrl[0] = base_data["base_right_wheel_vel"]
-                self.mj_data.actuator("base_left_wheel").ctrl[0] = base_data["base_left_wheel_vel"]
+                # Update action
+                action_data = self.protected_lekiwi_data.get_action_data()
+                logging.debug("Action to be applied to sim: %s", action_data)
+                # Base wheel velocities.
+                self.mj_data.actuator("base_back_wheel").ctrl[0] = action_data["base_back_wheel_vel"]
+                self.mj_data.actuator("base_right_wheel").ctrl[0] = action_data["base_right_wheel_vel"]
+                self.mj_data.actuator("base_left_wheel").ctrl[0] = action_data["base_left_wheel_vel"]
+                # Arm joint positions.
+                self.mj_data.actuator("Rotation").ctrl[0] = action_data["shoulder_pan_joint_pos"]
+                self.mj_data.actuator("Pitch").ctrl[0] = action_data["shoulder_lift_joint_pos"]
+                self.mj_data.actuator("Elbow").ctrl[0] = action_data["elbow_flex_joint_pos"]
+                self.mj_data.actuator("Wrist_Pitch").ctrl[0] = action_data["wrist_flex_joint_pos"]
+                self.mj_data.actuator("Wrist_Roll").ctrl[0] = action_data["wrist_roll_joint_pos"]
+                self.mj_data.actuator("Jaw").ctrl[0] = action_data["jaw_joint_pos"]
+                # Step simulation.
                 mujoco.mj_step(self.mj_model, self.mj_data)
 
-                observed_joints_names = self.protected_observation.get_observed_joints()
-
-                arm_state = {}
-                for joint_name in observed_joints_names:
-                    if joint_name.startswith("arm_"):
-                        arm_state[f"{joint_name}.pos"] = self.mj_data.joint(joint_name).qpos[0]
-
+                # Update observation
                 mobile_base_joint_velocities = [
                     self.mj_data.joint("base_left_wheel_joint").qvel[0],
                     self.mj_data.joint("base_right_wheel_joint").qvel[0],
@@ -150,36 +220,28 @@ class LeKiwiMujoco(Robot):
                 mobile_base_velocity = self.mobile_base_kinematics.forward_kinematics(
                     np.array(mobile_base_joint_velocities)
                 )
-                wheel_state = {
+                base_vel = {
                     "x.vel": mobile_base_velocity[0],
                     "y.vel": mobile_base_velocity[1],
                     "theta.vel": np.degrees(mobile_base_velocity[2]),
                 }
+                arm_state = {
+                    "arm_shoulder_pan.pos": np.degrees(self.mj_data.joint("Rotation").qpos[0]),
+                    "arm_shoulder_lift.pos": np.degrees(self.mj_data.joint("Pitch").qpos[0]),
+                    "arm_elbow_flex.pos": np.degrees(self.mj_data.joint("Elbow").qpos[0]),
+                    "arm_wrist_flex.pos": np.degrees(self.mj_data.joint("Wrist_Pitch").qpos[0]),
+                    "arm_wrist_roll.pos": np.degrees(self.mj_data.joint("Wrist_Roll").qpos[0]),
+                    "arm_gripper.pos": np.degrees(self.mj_data.joint("Jaw").qpos[0]),
+                }
 
-                self.protected_observation.set_observation({**arm_state, **wheel_state})
+                self.protected_observation.set_observation({**arm_state, **base_vel})
+                # TODO(francocipollone): Capture camera images and add to observation.
+
+                logging.debug("Observation from sim: %s", self.protected_observation.get_observation())
 
                 viewer.sync()
 
         self.mujoco_is_running = False
-
-    @property
-    def observation_features(self) -> dict[str, Any]:
-        """A dictionary describing the structure and types of the observations produced by the robot.
-
-        Its structure (keys) should match the structure of what is returned by :pymeth:`get_observation`.
-        Values for the dict should either be:
-            - The type of the value if it's a simple value, e.g. `float` for single proprioceptive
-              value (a joint's position/velocity)
-            - A tuple representing the shape if it's an array-type value, e.g. `(height, width, channel)` for images
-
-        Note: this property should be able to be called regardless of whether the robot is connected or not.
-
-        Returns:
-            dict: A dictionary with observation features.
-
-        """
-        # TODO(arilow): Implement.
-        return {}
 
     @property
     def action_features(self) -> dict[str, Any]:
@@ -284,12 +346,17 @@ class LeKiwiMujoco(Robot):
             )
         )
 
-        self.protected_lekiwi_data.set_base_data(
+        self.protected_lekiwi_data.set_action_data(
             base_left_wheel_vel=base_wheel_goal_vel[0],
             base_right_wheel_vel=base_wheel_goal_vel[1],
             base_back_wheel_vel=base_wheel_goal_vel[2],
+            shoulder_pan_joint_pos=np.radians(action.get("arm_shoulder_pan.pos", 0.0)),
+            shoulder_lift_joint_pos=np.radians(action.get("arm_shoulder_lift.pos", 0.0)),
+            elbow_flex_joint_pos=np.radians(action.get("arm_elbow_flex.pos", 0.0)),
+            wrist_flex_joint_pos=np.radians(action.get("arm_wrist_flex.pos", 0.0)),
+            wrist_roll_joint_pos=np.radians(action.get("arm_wrist_roll.pos", 0.0)),
+            jaw_joint_pos=action.get("arm_gripper.pos", 0.0),
         )
-        logging.debug("Set wheel velocities to: %s", base_wheel_goal_vel)
 
         return {
             "base_left_wheel_vel": base_wheel_goal_vel[0],
