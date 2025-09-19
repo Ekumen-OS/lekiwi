@@ -1,7 +1,10 @@
 [project]
 name = "lekiwi_sim"
 version = "0.1.0"
-authors = [{ name = "Ari Lowy", email = "arilow@ekumenlabs.com" }]
+authors = [
+  { name = "Ari Lowy", email = "arilow@ekumenlabs.com" },
+  { name = "Franco Cipollone", email = "franco.c@ekumenlabs.com"},
+]
 description = "Python package for simulating the Lekiwi robot in MuJoCo."
 readme = "README.md"
 requires-python = ">=3.10"

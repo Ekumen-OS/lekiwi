@@ -1,12 +1,19 @@
-# rnd_lekiwi
+# lekiwi
 
 ## :globe_with_meridians: Description
 
-TODO
+Monorepo for Lekiwi robot software and tooling. This workspace combines Rust and Python packages to provide:
+ - Simulation for LeKiwi robot.
+ - LeRobot scripts to be used in both simulated and real robot.
+ - Dora integration (TODO)
+ - Robotic stack (TODO)
 
 ## Prerequisites
 
-TODO
+ - For real robot:
+   - [LeKiwi](https://github.com/SIGRobotics-UIUC/LeKiwi) robot
+ - For simulation:
+   - Docker (See [#code-development](#code-development))
 
 ## Platforms
 
@@ -44,6 +51,40 @@ This repository combines both `rust` and `python` packages. `cargo` and `uv` are
     ```
     uv build --all-packages
     ```
+
+## Real Robot
+
+Refer to https://huggingface.co/docs/lerobot/en/lekiwi for information about using LeKiwi robot
+
+
+## Simulation
+
+[lekiwi-sim](packages/lekiwi_sim/) package provides a MuJoCo simulation.
+It works as replacement of the `lerobot`'s lekiwi host server that is used with the real robot, allowing the user to continue using `lerobot` API with the simulated environment
+
+<img src="docs/media/lekiwi_sim.png">
+
+### Quick Start
+
+```
+uv pip install -e packages/lekiwi_sim -e packages/lekiwi_teleoperate
+```
+On terminal #1:
+```
+uv run lekiwi_host_sim
+```
+On terminal #2:
+```
+uv run lekiwi_teleoperate
+```
+Use the second terminal to teleoperate the robot.
+
+Refer to [lekiwi-sim](packages/lekiwi_sim/README.md) for further information
+
+## *`lerobot`* Integration
+
+Naturally we rely on [lerobot](https://huggingface.co/docs/lerobot/en/lekiwi) machinery for controlling the Lekiwi robot as it contains all the functionalities to control and to integrate it with other ML workflows.
+The [`lekiwi_lerobot`](packages/lekiwi_lerobot/README.md) package contains some scripts and tooling for using lerobot API with real and simulated robot.
 
 ## *`dora`* Integration
 

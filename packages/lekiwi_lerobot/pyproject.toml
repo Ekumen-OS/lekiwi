@@ -1,14 +1,18 @@
 [project]
-name = "lekiwi_teleoperate"
+name = "lekiwi_lerobot"
 version = "0.1.0"
 authors = [{ name = "Franco Cipollone", email = "franco.c@ekumenlabs.com"}]
-description = "Teleoperate the Lekiwi robot using a keyboard."
+description = "Lekiwi lerobot integration."
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
+    "lekiwi_teleoperate>=0.1.0",
     "lerobot>=0.3.3",
-    "pyzmq>=25.0.0",
+    "numpy>=1.24.0",
 ]
+
+[tool.uv.sources]
+lekiwi_teleoperate = { workspace = true }
 
 [build-system]
 requires = ["setuptools"]
@@ -18,4 +22,5 @@ build-backend = "setuptools.build_meta"
 dev = ["pytest >=8.1.1", "ruff >=0.9.1"]
 
 [project.scripts]
-lekiwi_teleoperate = "lekiwi_teleoperate.main:main"
+lekiwi_lerobot_record = "lekiwi_lerobot.record:main"
+lekiwi_lerobot_replay = "lekiwi_lerobot.replay:main"

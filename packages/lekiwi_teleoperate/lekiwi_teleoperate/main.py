@@ -1,13 +1,13 @@
 import argparse
 import logging
 import time
-from typing import Any
 
-import numpy as np
 from lerobot.robots.lekiwi import LeKiwiClient, LeKiwiClientConfig
 from lerobot.teleoperators.keyboard.teleop_keyboard import KeyboardTeleop, KeyboardTeleopConfig
 from lerobot.utils.robot_utils import busy_wait
 from lerobot.utils.visualization_utils import _init_rerun, log_rerun_data
+
+from lekiwi_teleoperate.teleoperate.arm import ArmTeleop
 
 FPS = 30
 
@@ -41,75 +41,6 @@ Arm joint position:
 """
 
 
-class ArmTeleop:
-    """Class to handle arm teleoperation commands from keyboard inputs."""
-
-    ARM_TELEOP_KEYS = {
-        "shoulder_pan_left": "t",
-        "shoulder_pan_right": "g",
-        "shoulder_lift_up": "y",
-        "shoulder_lift_down": "h",
-        "elbow_flex_up": "u",
-        "elbow_flex_down": "j",
-        "wrist_flex_up": "i",
-        "wrist_flex_down": "k",
-        "wrist_roll_left": "o",
-        "wrist_roll_right": "l",
-        "gripper_open": "p",
-        "gripper_close": ";",
-    }
-
-    def __init__(self) -> None:
-        """Initialize the ArmTeleop class with default joint commands."""
-        self.shoulder_pan_cmd = 0.0  # deg
-        self.shoulder_lift_cmd = 0.0  # deg
-        self.elbow_flex_cmd = 0.0  # deg
-        self.wrist_flex_cmd = 0.0  # deg
-        self.wrist_roll_cmd = 0.0  # deg
-        self.gripper_cmd = 0.0  # 0.0 to 1
-
-    def from_keyboard_to_arm_action(self, pressed_keys: np.ndarray) -> dict[str, Any]:
-        """Convert keyboard inputs to arm action commands.
-
-        Args: pressed_keys (list): List of currently pressed keys.
-        Returns: dict: Dictionary with arm action commands.
-        """
-        if self.ARM_TELEOP_KEYS["shoulder_pan_left"] in pressed_keys:
-            self.shoulder_pan_cmd += 1.0
-        if self.ARM_TELEOP_KEYS["shoulder_pan_right"] in pressed_keys:
-            self.shoulder_pan_cmd -= 1.0
-        if self.ARM_TELEOP_KEYS["shoulder_lift_up"] in pressed_keys:
-            self.shoulder_lift_cmd += 1.0
-        if self.ARM_TELEOP_KEYS["shoulder_lift_down"] in pressed_keys:
-            self.shoulder_lift_cmd -= 1.0
-        if self.ARM_TELEOP_KEYS["elbow_flex_up"] in pressed_keys:
-            self.elbow_flex_cmd += 1.0
-        if self.ARM_TELEOP_KEYS["elbow_flex_down"] in pressed_keys:
-            self.elbow_flex_cmd -= 1.0
-        if self.ARM_TELEOP_KEYS["wrist_flex_up"] in pressed_keys:
-            self.wrist_flex_cmd += 1.0
-        if self.ARM_TELEOP_KEYS["wrist_flex_down"] in pressed_keys:
-            self.wrist_flex_cmd -= 1.0
-        if self.ARM_TELEOP_KEYS["wrist_roll_left"] in pressed_keys:
-            self.wrist_roll_cmd += 1.0
-        if self.ARM_TELEOP_KEYS["wrist_roll_right"] in pressed_keys:
-            self.wrist_roll_cmd -= 1.0
-        if self.ARM_TELEOP_KEYS["gripper_open"] in pressed_keys:
-            self.gripper_cmd += 0.1
-        if self.ARM_TELEOP_KEYS["gripper_close"] in pressed_keys:
-            self.gripper_cmd -= 0.1
-
-        return {
-            "arm_shoulder_pan.pos": self.shoulder_pan_cmd,
-            "arm_shoulder_lift.pos": self.shoulder_lift_cmd,
-            "arm_elbow_flex.pos": self.elbow_flex_cmd,
-            "arm_wrist_flex.pos": self.wrist_flex_cmd,
-            "arm_wrist_roll.pos": self.wrist_roll_cmd,
-            "arm_gripper.pos": self.gripper_cmd,
-        }
-
-
-# TODO(arilow): Add teleoperation of the arm.
 def main() -> None:
     """Main function to run the LeKiwi teleoperation client."""
     parser = argparse.ArgumentParser(description="Run the LeKiwi teleoperation client.")
@@ -121,6 +52,13 @@ def main() -> None:
         default="INFO",
         help="Set the logging level (default: INFO). Case-insensitive.",
     )
+    parser.add_argument(
+        "-i",
+        "--ip",
+        type=str,
+        default="127.0.0.1",
+        help="IP address of the robot (default: 127.0.0.1).",
+    )
     args = parser.parse_args()
     log_level = args.level.upper()
     logging.basicConfig(
@@ -129,7 +67,7 @@ def main() -> None:
     logging.info("Configuring LeKiwi teleoperation client")
 
     # Create the robot and teleoperator configurations
-    robot_config = LeKiwiClientConfig(remote_ip="127.0.0.1", id="my_lekiwi")
+    robot_config = LeKiwiClientConfig(remote_ip=args.ip, id="my_lekiwi")
     keyboard_config = KeyboardTeleopConfig(id="my_laptop_keyboard")
 
     robot = LeKiwiClient(robot_config)

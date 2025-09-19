@@ -1,7 +1,7 @@
 [project]
-name = "lekiwi-dora"
+name = "lekiwi"
 version = "0.1.0"
-description = "Lekiwi dora integration."
+description = "Lekiwi robot software stack."
 requires-python = ">=3.11"
 license = "MIT"
 dependencies = [
@@ -9,14 +9,18 @@ dependencies = [
 
 [tool.uv.workspace]
 members = [
-  "packages/dummy_package",
-  "packages/lekiwi_sim",
+  "packages/*",
 ]
 
 [tool.pyright]
 exclude = ["crates*", "target*", "packages*"]
 include = [
-  "packages/dummy_package",
+  "packages/lekiwi_lerobot",
   "packages/lekiwi_sim",
   "packages/lekiwi_teleoperate",
 ]
+
+[tool.uv.sources]
+lekiwi_lerobot = { path = "packages/lekiwi_lerobot" }
+lekiwi_sim = { path = "packages/lekiwi_sim" }
+lekiwi_teleoperate = { path = "packages/lekiwi_teleoperate" }

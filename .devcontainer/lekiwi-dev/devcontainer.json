@@ -12,6 +12,7 @@
       "UV_CACHE_DIR": "${containerWorkspaceFolder}/.uv_cache"
     },
     "mounts": [
+      "type=bind,source=${localEnv:HOME}/.ssh,target=/home/dev/.ssh,consistency=cached",
       "type=bind,source=/dev,target=/dev",
       "type=bind,source=/tmp/.X11-unix,target=/tmp/.X11-unix"
     ],
