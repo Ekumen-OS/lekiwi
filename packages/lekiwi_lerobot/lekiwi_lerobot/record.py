@@ -180,9 +180,6 @@ def main() -> None:
     # Configure the dataset features
     action_features = hw_to_dataset_features(robot.action_features, "action")
     obs_features = hw_to_dataset_features(robot.observation_features, "observation")
-
-    # TODO(francocipollone): Use wrist camera information as well.
-    obs_features.pop("observation.images.wrist")
     logging.info(f"Recording the following observation features: {list(obs_features.keys())}")
     logging.info(f"Recording the following action features: {list(action_features.keys())}")
     dataset_features = {**action_features, **obs_features}

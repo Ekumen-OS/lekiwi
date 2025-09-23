@@ -15,6 +15,7 @@
     <mesh name="Upper_Arm_Motor" file="Upper_Arm_Motor.stl"/>
     <mesh name="Lower_Arm" file="Lower_Arm.stl"/>
     <mesh name="Lower_Arm_Motor" file="Lower_Arm_Motor.stl"/>
+    <mesh name="Wrist_Camera_Mount" file="Wrist_Camera_Mount.stl" scale="0.001 0.001 0.001" />
     <mesh name="Wrist_Pitch_Roll" file="Wrist_Pitch_Roll.stl"/>
     <mesh name="Wrist_Pitch_Roll_Motor" file="Wrist_Pitch_Roll_Motor.stl"/>
     <mesh name="Fixed_Jaw" file="Fixed_Jaw.stl"/>
@@ -109,6 +110,15 @@
                 <geom class="finger_collision" name="fixed_jaw_pad_2" size="0.001 0.005 0.006" pos="0.0109 -0.0914 0"/>
                 <geom class="finger_collision" name="fixed_jaw_pad_3" size="0.001 0.01 0.007" pos="0.0126 -0.0768 0"/>
                 <geom class="finger_collision" name="fixed_jaw_pad_4" size="0.001 0.01 0.008" pos="0.0143 -0.0572 0"/>
+                <body name="wrist_camera_mount_link" pos="0.038 -0.025 0.02" euler="3.14 0.0 1.57">
+                    <geom type="mesh" mesh="Wrist_Camera_Mount" pos="0 0 0" euler="0 0 0" material="black"/>
+                    <inertial mass="0.09147094298688183" pos="0.0030289224720198397 0.00011242904514014542 0.02064739422580405" fullinertia="3.4924657273467044e-05 1.7958936503269972e-05 1.8461671554877027e-05 -2.8535574628355763e-08 1.483173255618039e-06 1.1115307183257866e-07" />
+                    <body name="wrist_camera_link" pos=".025 0.04 0.09" euler="3.14 0.95 0">
+                        <geom type="mesh" mesh="camera" pos="0 0 0" euler="0 0 0" material="black"/>
+                        <inertial mass="0.039920058315088616" pos="0.00011860470791938802 0.00023881874959842783 0.004326318838629241" fullinertia="5.219349028990072e-06 5.305573488496055e-06 7.674281395938296e-06 6.564111916115197e-08 1.3381791184156136e-08 2.6971366213773554e-08" />
+                        <camera name="wrist" mode="fixed" resolution="480 640" fovy="90" pos="0. 0.0 0.01" euler="3.14 0. -1.57" />
+                    </body>
+                </body>
                 <body name="Moving_Jaw" pos="-0.0202 -0.0244 0" quat="1.34924e-11 -3.67321e-06 1 -3.67321e-06">
                   <inertial pos="-0.00161745 -0.0303473 0.000449646" quat="0.696562 0.716737 -0.0239844 -0.0227026"
                     mass="0.0202444" diaginertia="1.11265e-05 8.99651e-06 2.99548e-06"/>

@@ -197,7 +197,8 @@ class LeKiwiMujoco(Robot):
 
     def run_mujoco_loop(self) -> None:
         """Run the MuJoCo simulation loop in a separate thread."""
-        self.mj_front_cam_renderer = mujoco.Renderer(self.mj_model, height=480, width=640)
+        self.mj_front_cam_renderer = mujoco.Renderer(self.mj_model, width=640, height=480)
+        self.mj_wrist_cam_renderer = mujoco.Renderer(self.mj_model, width=480, height=640)
         with mujoco.viewer.launch_passive(self.mj_model, self.mj_data) as viewer:
             while viewer.is_running() and self.mujoco_is_running:
                 # Update action
@@ -240,10 +241,12 @@ class LeKiwiMujoco(Robot):
                     "arm_gripper.pos": np.degrees(self.mj_data.joint("Jaw").qpos[0]),
                 }
                 self.mj_front_cam_renderer.update_scene(self.mj_data, camera=self.MUJOCO_LEKIWI_BASE_CAMARA_NAME)
-                rgb_frame = self.mj_front_cam_renderer.render()
+                front_frame = self.mj_front_cam_renderer.render()
+                self.mj_wrist_cam_renderer.update_scene(self.mj_data, camera=self.MUJOCO_LEKIWI_WRIST_CAMARA_NAME)
+                wrist_frame = self.mj_wrist_cam_renderer.render()
                 camera_obs = {
-                    "front": rgb_frame,
-                    # TODO(francocipollone): Add wrist camera rendering.
+                    "front": front_frame,
+                    "wrist": wrist_frame,
                 }
                 self.protected_observation.set_observation({**arm_state, **base_vel, **camera_obs})
 
