@@ -2,30 +2,30 @@
 
 #!/usr/bin/env python
 
-# Copyright 2024 The HuggingFace Inc. team. All rights reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# This script implements the LeKiwi host for simulation purposes. It uses ZeroMQ (ZMQ) for communication
+# between the host and the client. The host listens for commands from the client, executes them in the
+# MuJoCo simulation environment, and sends back observations including camera images.
+# The client is expected to be the `lerobot.robots.lekiwi.LekiwiClient`.
+# This file is heavily inspired by the real robot host implementation in `lerobot.robots.lekiwi.lekiwi_host.py`.
 
 import argparse
+import base64
 import json
 import logging
 import time
 
-# import cv2
+import cv2
+import numpy as np
 import zmq
 from lerobot.robots.lekiwi.config_lekiwi import LeKiwiHostConfig
 
 from .robot import LeKiwiMujoco, LeKiwiMujocoConfig
+
+
+def encode_image_to_base64(image: np.ndarray) -> str:
+    """Encode an image (numpy array) to a base64 string."""
+    _, buffer = cv2.imencode(".jpg", image, [int(cv2.IMWRITE_JPEG_QUALITY), 90])
+    return base64.b64encode(buffer).decode("utf-8")
 
 
 class ZMQHandler:
@@ -113,16 +113,11 @@ def main() -> None:
                 robot.stop_base()
 
             last_observation = robot.get_observation()
-
-            # # Encode ndarrays to base64 strings
-            # for cam_key, _ in robot.cameras.items():
-            #     ret, buffer = cv2.imencode(
-            #         ".jpg", last_observation[cam_key], [int(cv2.IMWRITE_JPEG_QUALITY), 90]
-            #     )
-            #     if ret:
-            #         last_observation[cam_key] = base64.b64encode(buffer).decode("utf-8")
-            #     else:
-            #         last_observation[cam_key] = ""
+            # Encode ndarrays from the cameras to base64 strings to make them JSON serializable and sendable over ZMQ
+            if last_observation.get("front") is not None:
+                last_observation["front"] = encode_image_to_base64(last_observation["front"])
+            if last_observation.get("wrist") is not None:
+                last_observation["wrist"] = encode_image_to_base64(last_observation["wrist"])
 
             # Send the observation to the remote agent
             try:

@@ -129,14 +129,14 @@ def lekiwi_mujoco_cameras_config() -> dict[str, CameraConfig]:
     """
     return {
         "front": CameraConfig(
-            fps=10,
-            width=640,
-            height=480,
+            fps=30,
+            width=480,
+            height=640,
         ),
         "wrist": CameraConfig(
-            fps=10,
-            width=640,
-            height=480,
+            fps=30,
+            width=480,
+            height=640,
         ),
     }
 
@@ -152,6 +152,9 @@ class LeKiwiMujocoConfig:
 
 class LeKiwiMujoco(Robot):
     """LeKiwi Robot implementation for MuJoCo simulation."""
+
+    MUJOCO_LEKIWI_BASE_CAMARA_NAME = "front"
+    MUJOCO_LEKIWI_WRIST_CAMARA_NAME = "wrist"
 
     def __init__(self, config: LeKiwiMujocoConfig) -> None:
         """Initialize the MuJoCo simulation environment"""
@@ -194,6 +197,7 @@ class LeKiwiMujoco(Robot):
 
     def run_mujoco_loop(self) -> None:
         """Run the MuJoCo simulation loop in a separate thread."""
+        self.mj_front_cam_renderer = mujoco.Renderer(self.mj_model, height=480, width=640)
         with mujoco.viewer.launch_passive(self.mj_model, self.mj_data) as viewer:
             while viewer.is_running() and self.mujoco_is_running:
                 # Update action
@@ -235,9 +239,13 @@ class LeKiwiMujoco(Robot):
                     "arm_wrist_roll.pos": np.degrees(self.mj_data.joint("Wrist_Roll").qpos[0]),
                     "arm_gripper.pos": np.degrees(self.mj_data.joint("Jaw").qpos[0]),
                 }
-
-                self.protected_observation.set_observation({**arm_state, **base_vel})
-                # TODO(francocipollone): Capture camera images and add to observation.
+                self.mj_front_cam_renderer.update_scene(self.mj_data, camera=self.MUJOCO_LEKIWI_BASE_CAMARA_NAME)
+                rgb_frame = self.mj_front_cam_renderer.render()
+                camera_obs = {
+                    "front": rgb_frame,
+                    # TODO(francocipollone): Add wrist camera rendering.
+                }
+                self.protected_observation.set_observation({**arm_state, **base_vel, **camera_obs})
 
                 logging.debug("Observation from sim: %s", self.protected_observation.get_observation())
 
