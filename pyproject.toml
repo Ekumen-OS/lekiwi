@@ -5,22 +5,30 @@ description = "Lekiwi robot software stack."
 requires-python = ">=3.11"
 license = "MIT"
 dependencies = [
+  "lekiwi_lerobot",
+  "lekiwi_sim",
+  "lekiwi_teleoperate",
 ]
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+# This project is a meta-package for the workspace, it contains no code itself.
+packages = []
 
 [tool.uv.workspace]
 members = [
-  "packages/*",
+  "packages/*"
 ]
 
 [tool.pyright]
-exclude = ["crates*", "target*", "packages*"]
 include = [
-  "packages/lekiwi_lerobot",
-  "packages/lekiwi_sim",
-  "packages/lekiwi_teleoperate",
+  "packages/*",
 ]
 
 [tool.uv.sources]
-lekiwi_lerobot = { path = "packages/lekiwi_lerobot" }
-lekiwi_sim = { path = "packages/lekiwi_sim" }
-lekiwi_teleoperate = { path = "packages/lekiwi_teleoperate" }
+lekiwi_lerobot = { workspace = true }
+lekiwi_sim = { workspace = true }
+lekiwi_teleoperate = { workspace = true }

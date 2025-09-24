@@ -67,7 +67,7 @@ It works as replacement of the `lerobot`'s lekiwi host server that is used with 
 ### Quick Start
 
 ```
-uv pip install -e packages/lekiwi_sim -e packages/lekiwi_teleoperate
+uv pip install -e .
 ```
 On terminal #1:
 ```

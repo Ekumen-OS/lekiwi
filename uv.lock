@@ -865,7 +865,19 @@ wheels = [
 [[package]]
 name = "lekiwi"
 version = "0.1.0"
-source = { virtual = "." }
+source = { editable = "." }
+dependencies = [
+    { name = "lekiwi-lerobot" },
+    { name = "lekiwi-sim" },
+    { name = "lekiwi-teleoperate" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "lekiwi-lerobot", editable = "packages/lekiwi_lerobot" },
+    { name = "lekiwi-sim", editable = "packages/lekiwi_sim" },
+    { name = "lekiwi-teleoperate", editable = "packages/lekiwi_teleoperate" },
+]
 
 [[package]]
 name = "lekiwi-lerobot"
