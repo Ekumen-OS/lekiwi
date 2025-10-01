@@ -25,6 +25,15 @@ class ArmTeleop:
         "gripper_close": ";",
     }
 
+    JOINT_LIMITS = {
+        "shoulder_pan": (-110.0, 110.0),  # 1.92 rad
+        "shoulder_lift": (-100.0, 100.0),  # 1.75 rad
+        "elbow_flex": (-95.0, 95.0),  # 1.66 rad
+        "wrist_flex": (-95.0, 95.0),  # 1.66 rad
+        "wrist_roll": (-160.0, 160.0),  # 2.79 rad
+        "gripper": (0.0, 34.4),  # 0.6 rad
+    }
+
     def __init__(self) -> None:
         """Initialize the ArmTeleop class with default joint commands."""
         self.shoulder_pan_cmd = 0.0  # deg
@@ -32,7 +41,7 @@ class ArmTeleop:
         self.elbow_flex_cmd = 0.0  # deg
         self.wrist_flex_cmd = 0.0  # deg
         self.wrist_roll_cmd = 0.0  # deg
-        self.gripper_cmd = 0.0  # 0.0 to 1
+        self.gripper_cmd = 0.0  # deg
 
     def from_keyboard_to_arm_action(self, pressed_keys: np.ndarray) -> dict[str, Any]:
         """Convert keyboard inputs to arm action commands.
@@ -61,10 +70,10 @@ class ArmTeleop:
         if self.ARM_TELEOP_KEYS["wrist_roll_right"] in pressed_keys:
             self.wrist_roll_cmd -= 1.0
         if self.ARM_TELEOP_KEYS["gripper_open"] in pressed_keys:
-            self.gripper_cmd += 0.1
+            self.gripper_cmd += 1.0
         if self.ARM_TELEOP_KEYS["gripper_close"] in pressed_keys:
-            self.gripper_cmd -= 0.1
-
+            self.gripper_cmd -= 1.0
+        self._verify_limits()
         return {
             "arm_shoulder_pan.pos": self.shoulder_pan_cmd,
             "arm_shoulder_lift.pos": self.shoulder_lift_cmd,
@@ -73,3 +82,22 @@ class ArmTeleop:
             "arm_wrist_roll.pos": self.wrist_roll_cmd,
             "arm_gripper.pos": self.gripper_cmd,
         }
+
+    def _verify_limits(self) -> None:
+        """Verify that the joint commands are within the defined limits."""
+        self.shoulder_pan_cmd = np.clip(
+            self.shoulder_pan_cmd, self.JOINT_LIMITS["shoulder_pan"][0], self.JOINT_LIMITS["shoulder_pan"][1]
+        )
+        self.shoulder_lift_cmd = np.clip(
+            self.shoulder_lift_cmd, self.JOINT_LIMITS["shoulder_lift"][0], self.JOINT_LIMITS["shoulder_lift"][1]
+        )
+        self.elbow_flex_cmd = np.clip(
+            self.elbow_flex_cmd, self.JOINT_LIMITS["elbow_flex"][0], self.JOINT_LIMITS["elbow_flex"][1]
+        )
+        self.wrist_flex_cmd = np.clip(
+            self.wrist_flex_cmd, self.JOINT_LIMITS["wrist_flex"][0], self.JOINT_LIMITS["wrist_flex"][1]
+        )
+        self.wrist_roll_cmd = np.clip(
+            self.wrist_roll_cmd, self.JOINT_LIMITS["wrist_roll"][0], self.JOINT_LIMITS["wrist_roll"][1]
+        )
+        self.gripper_cmd = np.clip(self.gripper_cmd, self.JOINT_LIMITS["gripper"][0], self.JOINT_LIMITS["gripper"][1])

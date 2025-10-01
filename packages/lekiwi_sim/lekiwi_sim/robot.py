@@ -368,7 +368,7 @@ class LeKiwiMujoco(Robot):
             elbow_flex_joint_pos=np.radians(action.get("arm_elbow_flex.pos", 0.0)),
             wrist_flex_joint_pos=np.radians(action.get("arm_wrist_flex.pos", 0.0)),
             wrist_roll_joint_pos=np.radians(action.get("arm_wrist_roll.pos", 0.0)),
-            jaw_joint_pos=action.get("arm_gripper.pos", 0.0),
+            jaw_joint_pos=np.radians(action.get("arm_gripper.pos", 0.0)),
         )
 
     def disconnect(self) -> None:
