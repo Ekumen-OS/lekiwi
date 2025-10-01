@@ -19,5 +19,19 @@
   <worldbody>
     <light pos="0 0 1.5" dir="0 0 -1" directional="true"/>
     <geom name="floor" pos="0 0 -0.1" size="0 0 0.05" type="plane" material="groundplane"/>
+    <body name="blue_cube" pos="0.3 0.15 0.08">
+      <joint type="free"/>
+      <geom name="blue_cube" type="box" size="0.016 0.016 0.016" rgba="0 0 1 1" mass="0.020"/>
+    </body>
+
+    <body name="red_cube" pos="0.3 0. 0.08">
+      <joint type="free"/>
+      <geom name="red_cube" type="box" size="0.016 0.016 0.016" rgba="1 0 0 1" mass="0.020"/>
+    </body>
+
+    <body name="green_cube" pos="0.3 -0.15 0.08">
+      <joint type="free"/>
+      <geom name="green_cube" type="box" size="0.016 0.016 0.016" rgba="0 1 0 1" mass="0.020"/>
+    </body>
   </worldbody>
 </mujoco>
