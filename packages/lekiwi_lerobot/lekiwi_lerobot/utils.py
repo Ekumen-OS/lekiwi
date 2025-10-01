@@ -66,12 +66,6 @@ def record_loop(
             break
 
         observation = robot.get_observation()
-        # only_arm = True
-        # if only_arm:
-        #     for key in ["x.vel", "y.vel", "theta.vel"]:
-        #         if key in observation:
-        #             observation.pop(key)
-
 
         if policy is not None or dataset is not None:
             if dataset.features is None:  # type: ignore[union-attr]
