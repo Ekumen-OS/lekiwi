@@ -17,7 +17,7 @@ from lerobot.utils.control_utils import (
 from lerobot.utils.visualization_utils import _init_rerun
 
 FPS = 30
-EPISODE_TIME_SEC = 30
+EPISODE_TIME_SEC = 120
 RESET_TIME_SEC = 10
 
 
@@ -105,6 +105,7 @@ def main() -> None:
     logging.info("Robot and keyboard are connected.")
     recorded_episodes = 0
     while recorded_episodes < args.episodes and not events["stop_recording"]:
+        arm_keyboard_handler = ArmTeleop()
         logging.info(f"Recording episode {recorded_episodes}")
         # Run the record loop
         record_loop(
