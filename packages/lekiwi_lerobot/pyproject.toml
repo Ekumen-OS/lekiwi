@@ -24,3 +24,4 @@ dev = ["pytest >=8.1.1", "ruff >=0.9.1"]
 [project.scripts]
 lekiwi_lerobot_record = "lekiwi_lerobot.record:main"
 lekiwi_lerobot_replay = "lekiwi_lerobot.replay:main"
+lekiwi_lerobot_evaluate = "lekiwi_lerobot.evaluate:main"

@@ -39,3 +39,27 @@ Run the replay client to play back a recorded episode:
 uv run lekiwi_lerobot_replay --repo-id <hf_username/dataset_name> --episode <index>
 ```
 Example: `uv run lekiwi_lerobot_replay --repo-id francocipollone/lekiwi_test --episode 0`
+
+
+### Training a model
+
+Once you have a dataset you can start training a model. For this, we can rely directly on the lerobot utilities.
+
+```
+uv run python -m lerobot.scripts.train \
+  --dataset.repo_id=francocipollone/pick_up_cubes \
+  --policy.type=act \
+  --output_dir=outputs/train/francocipollone/act_pick_up_cubes \
+  --job_name=lerobot_training \
+  --policy.device=cuda \
+  --policy.repo_id=<your_repo_id>
+  --wandb.enable=true
+```
+
+### Evaluating a model
+
+For evaluating any model you can run:
+```
+uv run lekiwi_lerobot_evaluate --repo-id <hf_username/model_name> --policy <hf_username/model_name>
+```
+Example: `uv run lekiwi_lerobot_evaluate -r francocipollone/evaluate_act --policy francocipollone/act_pick_up_cubes`

@@ -34,3 +34,6 @@ __pycache__
 .uv_cache
 
 build/
+
+# Outputs of training runs
+outputs/
