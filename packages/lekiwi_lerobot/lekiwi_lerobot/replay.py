@@ -8,6 +8,38 @@ from lerobot.robots.lekiwi.lekiwi_client import LeKiwiClient
 from lerobot.utils.robot_utils import busy_wait
 
 
+def adapt_to_older_dataset(action: dict[str, float]) -> dict[str, float]:
+    """Adapt action dictionary from older datasets to the current format."""
+    # 1
+    if "shoulder_pan" in action:
+        action["arm_shoulder_pan.pos"] = action.pop("shoulder_pan")
+    if "shoulder_lift" in action:
+        action["arm_shoulder_lift.pos"] = action.pop("shoulder_lift")
+    if "elbow_flex" in action:
+        action["arm_elbow_flex.pos"] = action.pop("elbow_flex")
+    if "wrist_flex" in action:
+        action["arm_wrist_flex.pos"] = action.pop("wrist_flex")
+    if "wrist_roll" in action:
+        action["arm_wrist_roll.pos"] = action.pop("wrist_roll")
+    if "gripper" in action:
+        action["arm_gripper.pos"] = action.pop("gripper")
+    # 2
+    if "shoulder_pan.pos" in action:
+        action["arm_shoulder_pan.pos"] = action.pop("shoulder_pan.pos")
+    if "shoulder_lift.pos" in action:
+        action["arm_shoulder_lift.pos"] = action.pop("shoulder_lift.pos")
+    if "elbow_flex.pos" in action:
+        action["arm_elbow_flex.pos"] = action.pop("elbow_flex.pos")
+    if "wrist_flex.pos" in action:
+        action["arm_wrist_flex.pos"] = action.pop("wrist_flex.pos")
+    if "wrist_roll.pos" in action:
+        action["arm_wrist_roll.pos"] = action.pop("wrist_roll.pos")
+    if "gripper.pos" in action:
+        action["arm_gripper.pos"] = action.pop("gripper.pos")
+
+    return action
+
+
 def main() -> None:
     """Main function to run the LeKiwi replay client."""
     parser = argparse.ArgumentParser(description="Run the LeKiwi replay client.")
@@ -66,6 +98,8 @@ def main() -> None:
         t0 = time.perf_counter()
 
         action = {name: float(actions[idx]["action"][i]) for i, name in enumerate(dataset.features["action"]["names"])}
+        action = adapt_to_older_dataset(action)
+        logging.debug(f"{action}")
         robot.send_action(action)
 
         busy_wait(max(1.0 / dataset.fps - (time.perf_counter() - t0), 0.0))
