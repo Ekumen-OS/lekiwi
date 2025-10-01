@@ -1,129 +1,24 @@
 import argparse
 import logging
-import time
-from typing import Any
 
+from lekiwi_lerobot.utils import record_loop
 from lekiwi_teleoperate.teleoperate.arm import ArmTeleop
-from lerobot.datasets.image_writer import safe_stop_image_writer
 from lerobot.datasets.lerobot_dataset import LeRobotDataset
-from lerobot.datasets.utils import build_dataset_frame, hw_to_dataset_features
-from lerobot.policies.pretrained import PreTrainedPolicy
+from lerobot.datasets.utils import hw_to_dataset_features
 from lerobot.robots.lekiwi.config_lekiwi import LeKiwiClientConfig
 from lerobot.robots.lekiwi.lekiwi_client import LeKiwiClient
-
-# from lerobot.record import record_loop
 from lerobot.teleoperators.keyboard import (
     KeyboardTeleop,
     KeyboardTeleopConfig,
 )
 from lerobot.utils.control_utils import (
     init_keyboard_listener,
-    predict_action,
 )
-from lerobot.utils.robot_utils import busy_wait
-from lerobot.utils.utils import (
-    get_safe_torch_device,
-)
-from lerobot.utils.visualization_utils import _init_rerun, log_rerun_data
+from lerobot.utils.visualization_utils import _init_rerun
 
 FPS = 30
 EPISODE_TIME_SEC = 30
 RESET_TIME_SEC = 10
-
-
-@safe_stop_image_writer  # type: ignore
-def record_loop(
-    robot: LeKiwiClient,
-    events: dict[Any, Any],
-    fps: int,
-    dataset: LeRobotDataset | None = None,
-    keyboard_handler: KeyboardTeleop | None = None,
-    arm_keyboard_handler: ArmTeleop | None = None,
-    policy: PreTrainedPolicy | None = None,
-    control_time_s: int | None = None,
-    single_task: str | None = None,
-    display_data: bool = False,
-) -> None:
-    """Record loop for teleoperation or policy execution.
-
-    This function is heavily influenced by the `lerobot.record.record_loop` function.
-    The main differences are:
-    - It supports both keyboard teleoperation and arm teleoperation.
-    """
-    if dataset is not None and dataset.fps != fps:
-        raise ValueError(f"The dataset fps should be equal to requested fps ({dataset.fps} != {fps}).")
-
-    if keyboard_handler is None:
-        raise ValueError("A keyboard handler must be provided for teleoperation.")
-
-    if arm_keyboard_handler is None:
-        raise ValueError("An arm teleop must be provided for teleoperation.")
-
-    if control_time_s is None:
-        raise ValueError("A control time must be provided.")
-
-    # if policy is given it needs cleaning up
-    if policy is not None:
-        policy.reset()
-
-    timestamp = 0.0
-    start_episode_t = time.perf_counter()
-    while timestamp < control_time_s:
-        start_loop_t = time.perf_counter()
-
-        if events["exit_early"]:
-            events["exit_early"] = False
-            break
-
-        observation = robot.get_observation()
-
-        if policy is not None or dataset is not None:
-            if dataset.features is None:  # type: ignore[union-attr]
-                raise ValueError("Dataset features must be defined if using a dataset or a policy.")
-            observation_frame = build_dataset_frame(dataset.features, observation, prefix="observation")  # type: ignore[union-attr]
-
-        if policy is not None:
-            action_values = predict_action(
-                observation_frame,
-                policy,
-                get_safe_torch_device(policy.config.device),
-                policy.config.use_amp,
-                task=single_task,
-                robot_type=robot.robot_type,
-            )
-            action = {key: action_values[i].item() for i, key in enumerate(robot.action_features)}
-        elif policy is None and keyboard_handler is not None and arm_keyboard_handler is not None:
-            pressed_keys = keyboard_handler.get_action()
-            base_action = robot._from_keyboard_to_base_action(pressed_keys)
-            arm_action = arm_keyboard_handler.from_keyboard_to_arm_action(pressed_keys)
-
-            action = {**base_action, **arm_action}  # Merge base and arm actions
-            logging.debug("Sending action: %s", action)
-
-        else:
-            logging.info(
-                "No policy or teleoperator provided, skipping action generation."
-                "This is likely to happen when resetting the environment without a teleop device."
-                "The robot won't be at its rest position at the start of the next episode."
-            )
-            continue
-
-        # Action can eventually be clipped using `max_relative_target`,
-        # so action actually sent is saved in the dataset.
-        sent_action = robot.send_action(action)
-
-        if dataset is not None:
-            action_frame = build_dataset_frame(dataset.features, sent_action, prefix="action")
-            frame = {**observation_frame, **action_frame}
-            dataset.add_frame(frame, task=single_task)
-
-        if display_data:
-            log_rerun_data(observation, action)
-
-        dt_s = time.perf_counter() - start_loop_t
-        busy_wait(1 / fps - dt_s)
-
-        timestamp = time.perf_counter() - start_episode_t
 
 
 def main() -> None:
