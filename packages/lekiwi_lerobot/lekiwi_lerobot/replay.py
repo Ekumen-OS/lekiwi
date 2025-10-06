@@ -62,8 +62,8 @@ def main() -> None:
         "-r",
         "--repo-id",
         type=str,
-        default="francocipollone/lekiwi_test",
-        help="Hugging Face repo ID of the dataset to replay. (default: francocipollone/lekiwi_test)",
+        default="francocipollone/lekiwi_sim_cubes",
+        help="Hugging Face repo ID of the dataset to replay. (default: francocipollone/lekiwi_sim_cubes)",
     )
     parser.add_argument(
         "-d",

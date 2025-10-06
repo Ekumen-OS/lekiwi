@@ -38,7 +38,7 @@ Run the replay client to play back a recorded episode:
 ```
 uv run lekiwi_lerobot_replay --repo-id <hf_username/dataset_name> --episode <index>
 ```
-Example: `uv run lekiwi_lerobot_replay --repo-id francocipollone/lekiwi_test --episode 0`
+Example: `uv run lekiwi_lerobot_replay --repo-id francocipollone/lekiwi_sim_cubes --episode 0`
 
 
 ### Training a model
