@@ -57,9 +57,9 @@ def main() -> None:
         "-p",
         "--policy",
         type=str,
-        default="francocipollone/act_pick_up_cube",
+        default="francocipollone/act_lekiwi_sim_cubes",
         help="Hugging Face repo ID or local path of the policy to evaluate. "
-        "(default: francocipollone/act_pick_up_cube)",
+        "(default: francocipollone/act_lekiwi_sim_cubes)",
     )
 
     args = parser.parse_args()

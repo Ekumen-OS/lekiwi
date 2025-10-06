@@ -49,17 +49,25 @@ Once you have a dataset you can start training a model. For this, we can rely di
 uv run python -m lerobot.scripts.train \
   --dataset.repo_id=francocipollone/pick_up_cubes \
   --policy.type=act \
-  --output_dir=outputs/train/francocipollone/act_pick_up_cubes \
+  --output_dir=outputs/train/francocipollone/act_lekiwi_sim_cubes \
   --job_name=lerobot_training \
   --policy.device=cuda \
   --policy.repo_id=<your_repo_id>
   --wandb.enable=true
 ```
 
+### Run the policy
+
+A simple script for running inference with the model is provided.
+```
+uv run lekiwi_lerobot_run_policy -p <repo_id_or_local_policy_path>
+```
+Example: `uv run lekiwi_lerobot_run_policy -p francocipollone/act_lekiwi_sim_cubes
+
 ### Evaluating a model
 
-For evaluating any model you can run:
+Evaluating the model while running the policy. A lerobot-inspired script is added for the evaluation:
 ```
 uv run lekiwi_lerobot_evaluate --repo-id <hf_username/model_name> --policy <hf_username/model_name>
 ```
-Example: `uv run lekiwi_lerobot_evaluate -r francocipollone/evaluate_act --policy francocipollone/act_pick_up_cubes`
+Example: `uv run lekiwi_lerobot_evaluate -r francocipollone/eval_act_lekiwi_sim_cubes --policy francocipollone/act_lekiwi_sim_cubes`
