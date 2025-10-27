@@ -1,6 +1,8 @@
 <mujoco model="lekiwi">
     <compiler angle="radian" />
     <asset>
+        <material name="lekiwi_white" rgba="1 1 1 1"/>
+        <material name="lekiwi_black" rgba="0.1 0.1 0.1 1"/>
         <mesh name="base_plate" file="meshes/base_plate.stl" scale="0.001 0.001 0.001"/>
         <mesh name="battery" file="meshes/battery.stl" scale="0.001 0.001 0.001" />
         <mesh name="camera" file="meshes/camera.stl" scale="0.001 0.001 0.001" />
@@ -28,8 +30,17 @@
             <geom type="mesh" mesh="wheel_hub" pos="0 0 0" euler="0 0 0" />
             <joint type="hinge" axis="0.0 0.0 1.0" pos="0.0 0.0 0.0" />
         </default>
-        <default class="wheel">
-            <geom type="mesh" mesh="wheel" pos="0 0 0" euler="0 0 0" material="white" friction="1 0.005 0.0001" />
+        <default class="wheel_visual">
+            <geom type="mesh" mesh="wheel" pos="0 0 0" euler="0 0 0" material="lekiwi_white" group="0" density="0" contype="0" conaffinity="0"/>
+        </default>
+        <default class="wheel_collision">
+            <!--
+             - solref and solimp values tuned for better contact behavior with ground plane to reduce bouncing and allowing for stable movement(mainly at high speeds)
+             - rgba alpha set to 0 to make collision geom invisible
+             -->
+            <geom type="cylinder" size="0.051 0.01" pos="0 0 0" euler="0 0 0"
+                  friction="1.0 0.05 0.001" solref="0.10 0.7" solimp="0.3 0.6 0.001"
+                  rgba="1 0 0 0" group="0"/>
         </default>
     </default>
 
@@ -43,7 +54,7 @@
         <body name="base_plate_layer_1_link" pos="0.0 0.0 0.0" euler="0.0 0.0 0.0">
             <joint type="free"/>
             <inertial mass="0.2" pos="0 0 0" />
-            <geom type="mesh" mesh="base_plate" material="black" pos="0 0 0" euler="0 0 -1.5708" />
+            <geom type="mesh" mesh="base_plate" material="lekiwi_black" pos="0 0 0" euler="0 0 -1.5708" />
             <body name="drive_motor_mount_back_link" pos="-0.09 0.02061 0.002" euler="0 0 -3.14159">
                 <geom class="drive_motor_mount"/>
                 <inertial mass="0.035884017191401885" pos="0.00017900181977195112 -0.0006914486154622601 0.0004348187449640745" fullinertia="3.2235542654871883e-06 3.901284246443171e-06 6.890721819180175e-06 -1.4488185386067676e-08 -3.4701845947883736e-08 1.0877684749210782e-07" />
@@ -54,8 +65,9 @@
                         <joint name="base_back_wheel_joint" class="wheel_hub" />
                         <geom class="wheel_hub"/>
                         <inertial mass="0.08665496109754897" pos="8.50877658112488e-09 7.358945011137765e-09 0.0023811166424899887" fullinertia="1.2296291761641504e-05 1.2296276073121143e-05 2.2911778015411222e-05 -3.19167294920219e-12 1.755992026942528e-12 1.5186622033709633e-12" />
-                        <body name="wheel_back_link" pos="0 0 0.01746" euler="-3.14159 0 -0.2618">
-                            <geom class="wheel"/>
+                        <body name="wheel_back_link" pos="0 0 0.01746" euler="-3.14159 0 0">
+                            <geom class="wheel_visual"/>
+                            <geom class="wheel_collision"/>
                             <inertial mass="1.3542854082324305" pos="-7.105207895657716e-08 -1.1369917947312704e-07 -1.2090586078983279e-08" fullinertia="0.0010936200374455458 0.0010936108480286116 0.0018798127501507855 -5.245142023675448e-09 4.046730352778215e-10 1.0004485488405523e-10" />
                         </body>
                     </body>
@@ -71,8 +83,9 @@
                         <joint name="base_right_wheel_joint" class="wheel_hub" />
                         <geom class="wheel_hub"/>
                         <inertial mass="0.08665496109754897" pos="8.50877658112488e-09 7.358945011137765e-09 0.0023811166424899887" fullinertia="1.2296291761641504e-05 1.2296276073121143e-05 2.2911778015411222e-05 -3.19167294920219e-12 1.755992026942528e-12 1.5186622033709633e-12" />
-                        <body name="wheel_right_link" pos="0 0 0.01746" euler="-3.14159 0 -0.2618">
-                            <geom class="wheel"/>
+                        <body name="wheel_right_link" pos="0 0 0.01746" euler="-3.14159 0 0">
+                            <geom class="wheel_visual"/>
+                            <geom class="wheel_collision"/>
                             <inertial mass="1.3542854082324305" pos="-7.105207895657716e-08 -1.1369917947312704e-07 -1.2090586078983279e-08" fullinertia="0.0010936200374455458 0.0010936108480286116 0.0018798127501507855 -5.245142023675448e-09 4.046730352778215e-10 1.0004485488405523e-10" />
                         </body>
                     </body>
@@ -88,8 +101,9 @@
                         <joint name="base_left_wheel_joint" class="wheel_hub" />
                         <geom class="wheel_hub"/>
                         <inertial mass="0.08665496109754897" pos="8.50877658112488e-09 7.358945011137765e-09 0.0023811166424899887" fullinertia="1.2296291761641504e-05 1.2296276073121143e-05 2.2911778015411222e-05 -3.19167294920219e-12 1.755992026942528e-12 1.5186622033709633e-12" />
-                        <body name="wheel_left_link" pos="0 0 0.01746" euler="-3.14159 0 -0.2618">
-                            <geom class="wheel"/>
+                        <body name="wheel_left_link" pos="0 0 0.01746" euler="-3.14159 0 0">
+                            <geom class="wheel_visual"/>
+                            <geom class="wheel_collision"/>
                             <inertial mass="1.3542854082324305" pos="-7.105207895657716e-08 -1.1369917947312704e-07 -1.2090586078983279e-08" fullinertia="0.0010936200374455458 0.0010936108480286116 0.0018798127501507855 -5.245142023675448e-09 4.046730352778215e-10 1.0004485488405523e-10" />
                         </body>
                     </body>
@@ -99,7 +113,7 @@
                 <geom type="mesh" mesh="servo_controller_mount" pos="0 0 0" euler="0 0 0" />
                 <inertial mass="0.06175589411431898" pos="-3.6769132064861433e-14 0.0 -0.0012090515491760903" fullinertia="1.0761471541836937e-05 1.8890192778258753e-05 2.9413765100515303e-05 2.602085214051591e-22 -6.608103581422321e-19 1.6940658945086007e-21" />
             </body>
-            <body name="lipo_battery_mount_link" pos="-0.02 0.05 0.0" euler="0.0 0.0 0.0">
+            <body name="lipo_battery_mount_link" pos="-0.02 0.00 0.0" euler="0.0 0.0 0.0">
                 <geom type="mesh" mesh="lipo_battery_mount" pos="0 0 0" euler="0 0 0" />
                 <inertial mass="0.1653518573066047" pos="-4.0023770071114873e-16 -0.003034408758946965 0.003481111705280585" fullinertia="9.882008372625315e-05 7.479150401991051e-05 0.0001696386060861471 4.0216183619824973e-19 -1.283332239482784e-19 2.263422861539775e-06" />
                 <body name="battery" pos="2.220446049250313e-18 0.036499999999999984 0.003000000000000007" euler="-1.5707963267948966 6.123233995736767e-17 -1.5707963267948966">
@@ -133,7 +147,7 @@
                 <inertial mass="0.006150070863406618" pos="2.1866952693017084e-14 -1.2010287342434374e-09 -6.6970201384464195e-09" fullinertia="1.096519665085043e-06 1.0965196548945862e-06 1.8373964931164182e-08 2.7105054312137834e-20 2.6969529040576923e-18 -9.149559950144271e-14" />
             </body>
             <body name="base_plate_layer_2_link" pos="0.0 0.0 0.057" euler="-0.0 0.0 -0.0">
-                <geom type="mesh" mesh="base_plate" material="black" pos="0 0 0" euler="0 0 -1.5708" />
+                <geom type="mesh" mesh="base_plate" material="lekiwi_black" pos="0 0 0" euler="0 0 -1.5708" />
                 <inertial mass="0.2" pos="0 0 0" />
                 <body name="sbc_case_bottom_link" pos="-0.064 0 0" euler="0.0 0.0 1.5708">
                     <geom type="mesh" mesh="sbc_case_bottom" pos="0 0 0" euler="0 0 0" />

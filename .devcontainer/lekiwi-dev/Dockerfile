@@ -110,7 +110,7 @@ RUN pip install --upgrade pip
 RUN cargo install \
     # Depending on binary crates doesn't allow you to use them from cli.
     # https://github.com/rust-lang/cargo/issues/2267
-    dora-cli --version 0.3.12
+    dora-cli --version 0.3.13
 
 # The previous commands roots permissions in ${CARGO_HOME} and ${RUSTUP_HOME}.
 # Establish wide permissions for user 'dev'. This step takes several minutes.
