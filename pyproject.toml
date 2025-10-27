@@ -5,9 +5,12 @@ description = "Lekiwi robot software stack."
 requires-python = ">=3.11"
 license = "MIT"
 dependencies = [
+  "dora_lekiwi_action_publisher",
+  "dora_lekiwi_client",
   "lekiwi_lerobot",
   "lekiwi_sim",
   "lekiwi_teleoperate",
+  "rerun-sdk==0.24.1",
 ]
 
 [build-system]
@@ -20,15 +23,21 @@ packages = []
 
 [tool.uv.workspace]
 members = [
+  "dora/node_hub/dora_lekiwi_action_publisher",
+  "dora/node_hub/dora_lekiwi_client",
   "packages/*"
 ]
 
 [tool.pyright]
 include = [
+  "dora/node_hub/dora_lekiwi_action_publisher",
+  "dora/node_hub/dora_lekiwi_client",
   "packages/*",
 ]
 
 [tool.uv.sources]
+dora_lekiwi_action_publisher = { workspace = true }
+dora_lekiwi_client = { workspace = true }
 lekiwi_lerobot = { workspace = true }
 lekiwi_sim = { workspace = true }
 lekiwi_teleoperate = { workspace = true }
