@@ -101,6 +101,16 @@ def main() -> None:
     """
     node = Node()
     robot = initialize_robot_client()
+    action_features = list(robot.action_features.keys())
+    observation_features = list(robot.observation_features.keys())
+    print("action features:", robot.action_features)
+    print("observation features:", robot.observation_features)
+    from lerobot.datasets.utils import hw_to_dataset_features
+
+    print(
+        "hw observation features:",
+        hw_to_dataset_features(robot.observation_features, "observation"),
+    )
 
     for event in node:
         if event["type"] == "INPUT":
@@ -114,6 +124,8 @@ def main() -> None:
                 state_metadata["primitive"] = (
                     "series"  # Used by other nodes like dora-rerun
                 )
+                state_metadata["action_features"] = action_features
+                state_metadata["observation_features"] = observation_features
                 node.send_output(
                     output_id="observation_state",
                     data=pa.array(observation_state),
@@ -130,7 +142,7 @@ def main() -> None:
 
             elif event["id"] == "actions":
                 # Handle actions sent to the robot
-                action_data = event["value"].to_pylist()
+                action_data = event["value"].to_numpy()
                 # Action data is expected to be sorted in the correct order
                 action = {
                     key: action_data[i] for i, key in enumerate(robot.action_features)

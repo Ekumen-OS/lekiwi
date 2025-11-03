@@ -1,0 +1,29 @@
+[project]
+name = "dora_run_policy"
+version = "0.1.0"
+authors = [{ name = "Franco Cipollone", email = "franco.c@ekumenlabs.com" }]
+description = "dora_run_policy"
+license = { text = "MIT" }
+readme = "README.md"
+requires-python = ">=3.10"
+
+dependencies = [
+  "dora-rs >= 0.3.13",
+  "lerobot==0.3.3"
+]
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[dependency-groups]
+dev = ["pytest >=8.1.1", "ruff >=0.9.1"]
+
+[project.scripts]
+dora_run_policy = "dora_run_policy.main:main"
+
+[tool.ruff.lint]
+extend-select = [
+  "D",   # pydocstyle
+  "UP"
+]
