@@ -100,10 +100,15 @@ def main():
     last_image_wrist_event = None
 
     # Load policy from environment variable or use default
-    model_name = os.getenv("LEKIWI_POLICY_MODEL", "francocipollone/act_lekiwi_sim_cubes")
+    policy_type = os.getenv("POLICY_TYPE", "act")
+    model_name = os.getenv("POLICY_MODEL", "francocipollone/act_lekiwi_sim_cubes")
     
     try:
-        policy = ACTPolicy.from_pretrained(model_name)
+        policy = None
+        if policy_type.lower() == "act":
+          policy = ACTPolicy.from_pretrained(model_name)
+        else :
+          raise ValueError(f"Unsupported policy type: {policy_type}")
         policy.reset()
         device_name = policy.config.device or "auto"
         device = get_safe_torch_device(device_name)

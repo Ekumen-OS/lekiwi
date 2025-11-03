@@ -66,6 +66,14 @@ def main() -> None:
         default="INFO",
         help="Set the logging level (default: INFO). Case-insensitive.",
     )
+    parser.add_argument(
+        "-f",
+        "--frequency",
+        type=float,
+        default=50.0,
+        help="Set the maximum loop frequency in Hz (default: 100.0).",
+    )
+
     args = parser.parse_args()
     log_level = args.level.upper()
     logging.basicConfig(
@@ -80,6 +88,7 @@ def main() -> None:
 
     logging.info("Starting HostAgent")
     host_config = LeKiwiHostConfig()
+    host_config.max_loop_freq_hz = args.frequency
     host = ZMQHandler(host_config)
 
     last_cmd_time = time.time()
@@ -89,8 +98,7 @@ def main() -> None:
         # Business logic
         start = time.perf_counter()
         while robot.is_connected:
-            # while duration < host.connection_time_s:
-            loop_start_time = time.time()
+            loop_start_time = time.perf_counter()
             try:
                 msg = host.zmq_cmd_socket.recv_string(zmq.NOBLOCK)
                 data = dict(json.loads(msg))
@@ -126,10 +134,8 @@ def main() -> None:
                 logging.debug("Dropping observation, no client connected")
 
             # Ensure a short sleep to avoid overloading the CPU.
-            elapsed = time.time() - loop_start_time
-
-            time.sleep(max(1 / host.max_loop_freq_hz - elapsed, 0))
-            time.perf_counter() - start
+            elapsed = time.perf_counter() - loop_start_time
+            time.sleep(max(1 / host_config.max_loop_freq_hz - elapsed, 0))
         print("Cycle time reached.")
 
     except KeyboardInterrupt:

@@ -3,7 +3,7 @@ nodes:
     build: uv pip install -e ../../node_hub/dora_lekiwi_client
     path: dora_lekiwi_client
     inputs:
-      tick: dora/timer/millis/100
+      tick: dora/timer/millis/10
       actions: dora_run_policy/actions
     outputs:
       # ["arm_shoulder_pan.pos", "arm_shoulder_lift.pos", "arm_elbow_flex.pos", "arm_wrist_flex.pos", "arm_wrist_roll.pos", "arm_gripper.pos", "x.vel", "y.vel", "theta.vel"]
@@ -27,12 +27,15 @@ nodes:
     build: uv pip install -e ../../node_hub/dora_run_policy
     path: dora_run_policy
     inputs:
-      tick: dora/timer/millis/1
+      tick: dora/timer/millis/10
       observation_state: dora_lekiwi_client/observation_state
       image_front: dora_lekiwi_client/image_front
       image_wrist: dora_lekiwi_client/image_wrist
     outputs:
       - actions
+    env:
+      POLICY_TYPE: ACT
+      POLICY_MODEL: francocipollone/act_lekiwi_sim_cubes
 
   # - id: rerun-viz
   #   # TODO: Use tag once there is a new release

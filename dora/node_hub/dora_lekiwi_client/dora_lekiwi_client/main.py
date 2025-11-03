@@ -13,7 +13,6 @@ from lerobot.robots.lekiwi import LeKiwiClient, LeKiwiClientConfig
 
 from dora import Node  # type: ignore
 
-
 def convert_rgb_to_bgr(frame_rgb: np.ndarray) -> np.ndarray:
     """Convert an RGB frame to BGR format.
 
@@ -105,18 +104,13 @@ def main() -> None:
     observation_features = list(robot.observation_features.keys())
     print("action features:", robot.action_features)
     print("observation features:", robot.observation_features)
-    from lerobot.datasets.utils import hw_to_dataset_features
-
-    print(
-        "hw observation features:",
-        hw_to_dataset_features(robot.observation_features, "observation"),
-    )
 
     for event in node:
         if event["type"] == "INPUT":
             if event["id"] == "tick":
                 # Handle tick event
                 observation = robot.get_observation()
+                # print("Time to get observation:", time.time() - time_before_get_observation)
                 observation_state = observation["observation.state"]
 
                 # Send observation state
@@ -131,7 +125,6 @@ def main() -> None:
                     data=pa.array(observation_state),
                     metadata=state_metadata,
                 )
-
                 # Send camera images
                 send_image_output(
                     node, "image_front", observation["front"], event["metadata"]
