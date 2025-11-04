@@ -7,6 +7,11 @@ from lerobot.datasets.image_writer import safe_stop_image_writer
 from lerobot.datasets.lerobot_dataset import LeRobotDataset
 from lerobot.datasets.utils import build_dataset_frame
 from lerobot.policies.pretrained import PreTrainedPolicy
+from lerobot.processor import (
+    RobotAction,
+    RobotObservation,
+    RobotProcessorPipeline,
+)
 from lerobot.robots.lekiwi.lekiwi_client import LeKiwiClient
 from lerobot.teleoperators.keyboard import (
     KeyboardTeleop,
@@ -26,6 +31,13 @@ def record_loop(
     robot: LeKiwiClient,
     events: dict[Any, Any],
     fps: int,
+    teleop_action_processor: RobotProcessorPipeline[
+        tuple[RobotAction, RobotObservation], RobotAction
+    ],  # runs after teleop
+    robot_action_processor: RobotProcessorPipeline[
+        tuple[RobotAction, RobotObservation], RobotAction
+    ],  # runs before robot
+    robot_observation_processor: RobotProcessorPipeline[RobotObservation, RobotObservation],  # runs after robot
     dataset: LeRobotDataset | None = None,
     keyboard_handler: KeyboardTeleop | None = None,
     arm_keyboard_handler: ArmTeleop | None = None,
@@ -78,6 +90,8 @@ def record_loop(
                 policy,
                 get_safe_torch_device(policy.config.device),
                 policy.config.use_amp,
+                preprocessor=preprocessor,
+                postprocessor=postprocessor,
                 task=single_task,
                 robot_type=robot.robot_type,
             )

@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
     "mujoco>=3.2.6",
-    "lerobot==0.3.3",
+    "lerobot==0.4.0",
     "pyzmq>=25.0.0",
     "numpy>=1.24.0",
 ]

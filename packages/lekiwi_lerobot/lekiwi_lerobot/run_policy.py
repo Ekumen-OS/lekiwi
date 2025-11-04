@@ -4,12 +4,13 @@ import time
 
 from lerobot.datasets.utils import build_dataset_frame, hw_to_dataset_features
 from lerobot.policies.act.modeling_act import ACTPolicy
+from lerobot.policies.factory import make_pre_post_processors
 from lerobot.robots.lekiwi.config_lekiwi import LeKiwiClientConfig
 from lerobot.robots.lekiwi.lekiwi_client import LeKiwiClient
 from lerobot.utils.control_utils import init_keyboard_listener, predict_action
 from lerobot.utils.robot_utils import busy_wait
 from lerobot.utils.utils import get_safe_torch_device
-from lerobot.utils.visualization_utils import _init_rerun, log_rerun_data
+from lerobot.utils.visualization_utils import init_rerun, log_rerun_data
 
 FPS = 30
 
@@ -86,8 +87,12 @@ def main() -> None:
     obs_features = hw_to_dataset_features(robot.observation_features, "observation")
     dataset_features = {**action_features, **obs_features}
     device = get_safe_torch_device(policy.config.device)
-
-    _init_rerun(session_name="lekiwi_run_policy")
+    # Build Policy Processors
+    preprocessor, postprocessor = make_pre_post_processors(
+        policy_cfg=policy.config,
+        pretrained_path=None,
+    )
+    init_rerun(session_name="lekiwi_run_policy")
 
     listener, events = init_keyboard_listener()
 
@@ -103,6 +108,8 @@ def main() -> None:
             observation_frame,
             policy,
             device,
+            preprocessor,
+            postprocessor,
             policy.config.use_amp,
             task=args.task,
             robot_type=robot.robot_type,

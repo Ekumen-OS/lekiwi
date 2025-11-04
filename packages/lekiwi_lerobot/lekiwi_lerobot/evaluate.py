@@ -15,7 +15,7 @@ from lerobot.teleoperators.keyboard import (
 from lerobot.utils.control_utils import (
     init_keyboard_listener,
 )
-from lerobot.utils.visualization_utils import _init_rerun
+from lerobot.utils.visualization_utils import init_rerun
 
 FPS = 30
 EPISODE_TIME_SEC = 180
@@ -108,7 +108,7 @@ def main() -> None:
     robot.connect()
     keyboard.connect()
 
-    _init_rerun(session_name="lekiwi_evaluate")
+    init_rerun(session_name="lekiwi_evaluate")
 
     listener, events = init_keyboard_listener()
 

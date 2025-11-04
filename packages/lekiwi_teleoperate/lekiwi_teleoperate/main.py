@@ -5,7 +5,7 @@ import time
 from lerobot.robots.lekiwi import LeKiwiClient, LeKiwiClientConfig
 from lerobot.teleoperators.keyboard.teleop_keyboard import KeyboardTeleop, KeyboardTeleopConfig
 from lerobot.utils.robot_utils import busy_wait
-from lerobot.utils.visualization_utils import _init_rerun, log_rerun_data
+from lerobot.utils.visualization_utils import init_rerun, log_rerun_data
 
 from lekiwi_teleoperate.teleoperate.arm import ArmTeleop
 
@@ -77,7 +77,7 @@ def main() -> None:
     robot.connect()
     keyboard.connect()
 
-    _init_rerun(session_name="lekiwi_teleop")
+    init_rerun(session_name="lekiwi_teleop")
 
     if not robot.is_connected or not keyboard.is_connected:
         raise ValueError("Robot, leader arm of keyboard is not connected!")

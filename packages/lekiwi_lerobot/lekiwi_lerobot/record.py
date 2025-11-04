@@ -5,6 +5,7 @@ from lekiwi_lerobot.utils import record_loop
 from lekiwi_teleoperate.teleoperate.arm import ArmTeleop
 from lerobot.datasets.lerobot_dataset import LeRobotDataset
 from lerobot.datasets.utils import hw_to_dataset_features
+from lerobot.processor import make_default_processors
 from lerobot.robots.lekiwi.config_lekiwi import LeKiwiClientConfig
 from lerobot.robots.lekiwi.lekiwi_client import LeKiwiClient
 from lerobot.teleoperators.keyboard import (
@@ -14,7 +15,7 @@ from lerobot.teleoperators.keyboard import (
 from lerobot.utils.control_utils import (
     init_keyboard_listener,
 )
-from lerobot.utils.visualization_utils import _init_rerun
+from lerobot.utils.visualization_utils import init_rerun
 
 FPS = 30
 EPISODE_TIME_SEC = 120
@@ -96,7 +97,8 @@ def main() -> None:
     robot.connect()
     keyboard.connect()
 
-    _init_rerun(session_name="lekiwi_record")
+    init_rerun(session_name="lekiwi_record")
+    teleop_action_processor, robot_action_processor, robot_observation_processor = make_default_processors()
 
     listener, events = init_keyboard_listener()
 
