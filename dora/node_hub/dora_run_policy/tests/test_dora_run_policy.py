@@ -3,7 +3,7 @@
 import pytest
 
 
-def test_import_main():
+def test_import_main() -> None:
     """Test importing and running the main function."""
     from dora_run_policy.main import main
 

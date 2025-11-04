@@ -95,8 +95,6 @@ def main() -> None:
     watchdog_active = False
     logging.info("Waiting for commands...")
     try:
-        # Business logic
-        start = time.perf_counter()
         while robot.is_connected:
             loop_start_time = time.perf_counter()
             try:
