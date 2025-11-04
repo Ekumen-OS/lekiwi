@@ -226,13 +226,6 @@ dora run mujoco_sim.yml --uv
 
 ```
 
-**Configure policy model:**
-```bash
-# Edit the dataflow file or set environment variable
-export POLICY_MODEL="your_username/your_trained_policy"
-dora start mujoco_sim.yml
-```
-
 **Optional features** (uncomment in `mujoco_sim.yml`):
 - **Visualization**: Enable `rerun-viz` node for real-time 3D visualization
 - **Data Recording**: Enable `dora-record` node to save observations to Parquet files
