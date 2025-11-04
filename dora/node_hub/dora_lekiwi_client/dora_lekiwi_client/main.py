@@ -13,6 +13,7 @@ from lerobot.robots.lekiwi import LeKiwiClient, LeKiwiClientConfig
 
 from dora import Node  # type: ignore
 
+
 def convert_rgb_to_bgr(frame_rgb: np.ndarray) -> np.ndarray:
     """Convert an RGB frame to BGR format.
 
@@ -110,7 +111,6 @@ def main() -> None:
             if event["id"] == "tick":
                 # Handle tick event
                 observation = robot.get_observation()
-                # print("Time to get observation:", time.time() - time_before_get_observation)
                 observation_state = observation["observation.state"]
 
                 # Send observation state

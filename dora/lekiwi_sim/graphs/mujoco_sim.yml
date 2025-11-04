@@ -10,9 +10,10 @@ nodes:
       - observation_state
       - image_front
       - image_wrist
-    # env:
-    #   TIMESTEP: 0.001 # [s]
 
+  ######################################################
+  # Example of a hard-coded action publisher.
+  #######################################################
   # - id: dora_lekiwi_action_publisher
   #   build: uv pip install -e ../../node_hub/dora_lekiwi_action_publisher
   #   path: dora_lekiwi_action_publisher
@@ -37,6 +38,10 @@ nodes:
       POLICY_TYPE: ACT
       POLICY_MODEL: francocipollone/act_lekiwi_sim_cubes
 
+  ############################################################
+  # Example of a rerun visualization node
+  ############################################################
+  # TODO: Enable once lerobot is updated to 0.4.0 due to rerun version conflict.
   # - id: rerun-viz
   #   # TODO: Use tag once there is a new release
   #   build: cargo install --git https://github.com/dora-rs/dora-hub dora-rerun
@@ -54,6 +59,9 @@ nodes:
   #   env:
   #     OPERATING_MODE: SPAWN
 
+  ###########################################################
+  # Example of a recorder node. The outputs are parquet files.
+  ###########################################################
   # - id: dora-record
   #   # TODO: Use tag once there is a new release
   #   build: cargo install --git https://github.com/dora-rs/dora-hub/ dora-record

@@ -1,19 +1,83 @@
-# Lekiwi Sim
+# LeKiwi Simulation (lekiwi_sim)
 
-MuJoCo simulation of Lekiwi robot.
+High-fidelity MuJoCo-based simulation environment for the LeKiwi robot. This package provides a drop-in replacement for the real robot's host server, enabling seamless development and testing using the LeRobot API.
 
-## Getting Started
+## Features
 
-### Build
+- **🎯 Physics-Accurate Simulation**: High-fidelity MuJoCo physics engine
+- **🤖 Complete Robot Model**: Omniwheel base, robotic arm, and gripper
+- **📹 Camera Simulation**: Front and wrist camera feeds
+- **🔌 LeRobot Compatible**: Drop-in replacement for real robot
+- **⚡ Real-time Visualization**: Interactive 3D environment
+- **🎮 Teleoperation Support**: Direct control via keyboard
 
- - Install the package: `uv pip install -e .`
-  Note: If you don't have a `venv` already in the root workspace then create environment first: `uv venv -p 3.11 --seed`
+## Installation
 
-### Run Simulation
+### Prerequisites
+- Python 3.11+
+- MuJoCo (automatically installed with package)
+- OpenGL support for visualization
 
- - Run MuJoCo simulation sever:
-   - `uv run lekiwi_sim_host`
-     - Once this is running you can use all the `lerobot` machinery with `lekiwi` robot via the `lerobot.robot.LekiwiClient` API.
-       - Check [lekiwi_teleoperate](../lekiwi_teleoperate/README.md) and [lekiwi_lerobot](../lekiwi_lerobot/README.md)
+### Quick Install
+```bash
+# From repository root
+uv pip install -e packages/lekiwi_sim/
 
- - For running just the standalone MuJoCo simulation: `uv run standalone_mujoco_sim`
+# Or if no virtual environment exists
+uv venv -p 3.11 --seed
+source .venv/bin/activate
+uv pip install -e packages/lekiwi_sim/
+```
+
+## Usage
+
+### Simulation Server Mode
+Start the simulation server that mimics the real robot's host server:
+
+```bash
+uv run lekiwi_sim_host
+```
+
+This creates a server compatible with `lerobot.robots.LeKiwiClient` API. You can then:
+- Use teleoperation: `uv run lekiwi_teleoperate`
+- Record episodes: `uv run lekiwi_lerobot_record`
+- Run policies: `uv run lekiwi_lerobot_replay`
+
+### Standalone Visualization
+For direct MuJoCo simulation without server:
+
+```bash
+uv run lekiwi_sim_standalone
+```
+
+This mode is useful for:
+- Model debugging
+- Physics parameter tuning
+- Visual inspection of robot behavior
+
+## API Compatibility
+
+The simulation server provides the same API as the real LeKiwi robot so LeKiwiClient implementation from LeRobot can still be used.
+
+```python
+from lerobot.robots.lekiwi import LeKiwiClient, LeKiwiClientConfig
+
+# Connect to simulation (default: localhost:5556)
+config = LeKiwiClientConfig(remote_ip="127.0.0.1")
+robot = LeKiwiClient(config)
+robot.connect()
+
+# Get observations
+obs = robot.get_observation()
+print(obs.keys())  # ['observation.state', 'front', 'wrist']
+
+# Send actions
+action = {
+    'base.x': 0.1,
+    'base.y': 0.0,
+    'base.theta': 0.0,
+    'arm.joint_1': 0.0,
+    # ... other joints
+}
+robot.send_action(action)
+```

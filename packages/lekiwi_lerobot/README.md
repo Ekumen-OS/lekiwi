@@ -1,73 +1,116 @@
-# lekiwi_lerobot
+# LeKiwi LeRobot Integration (lekiwi_lerobot)
 
-`lekiwi_lerobot` provides tools for recording and replaying teleoperation episodes with the LeKiwi robot, supporting both real and simulated environments. It integrates with the [`lerobot`](https://huggingface.co/docs/lerobot/en/lekiwi) stack and stores datasets on Hugging Face Hub.
+Machine learning integration package for the LeKiwi robot, providing tools for data collection, policy training, and automated evaluation. This package bridges the gap between manual teleoperation and autonomous behavior through the LeRobot framework.
 
 ## Features
 
-- **Record**: Capture robot actions and observations during teleoperation or policy execution.
-- **Replay**: Play back recorded episodes on a connected LeKiwi robot or simulator.
-- **Evaluate**: TODO
+- **📹 Data Recording**: Capture high-quality demonstration episodes
+- **🔄 Replay System**: Reproduce recorded behaviors accurately
+- **🧠 Policy Training**: Train ACT and other imitation learning models
+- **📊 Evaluation**: Automated policy assessment and benchmarking
+- **☁️ Cloud Integration**: Seamless Hugging Face Hub integration
+- **🎯 Multi-Environment**: Works with both real robot and simulation
+
+## Prerequisites
+
+- Python 3.11+
+- [lerobot](https://pypi.org/project/lerobot/) >= 0.3.3
+- [lekiwi_teleoperate](../lekiwi_teleoperate/) >= 0.1.0
+- Hugging Face account with authentication
+- CUDA-capable GPU (recommended for training)
+
+## Installation
+
+```bash
+# From repository root
+uv pip install -e packages/lekiwi_lerobot/
+
+# Or if no virtual environment exists
+uv venv -p 3.11 --seed
+source .venv/bin/activate
+uv pip install -e packages/lekiwi_lerobot/
+```
 
 ## Authentication
 
-Before recording or replaying datasets, authenticate with Hugging Face:
+Authenticate with Hugging Face to store and access datasets:
 
-```sh
-hf auth login <your_token>
+```bash
+huggingface-cli login
+# or
+hf auth login
 ```
 
-## Getting Started
+Get your token from: https://huggingface.co/settings/tokens
 
-### Build
+## Workflow Overview
 
- - Install the package: `uv pip install -e .`
-  Note: If you don't have a `venv` already in the root workspace then create environment first: `uv venv -p 3.11 --seed`
+1. **Record** demonstrations via teleoperation
+2. **Train** policies using recorded data
+3. **Evaluate** trained policies automatically
+4. **Deploy** successful policies for autonomous operation
 
-### Recording a dataset
+## Data Recording
 
-Run the recording client to capture episodes and push them to Hugging Face:
+Record demonstration episodes during teleoperation:
 
-```
-uv run lekiwi_lerobot_record --repo-id <hf_username/dataset_name> --episodes <num> --task "<task description>"
-```
-
-### Replying a dataset
-
-Run the replay client to play back a recorded episode:
+```bash
+uv run lekiwi_lerobot_record --repo-id username/dataset_name --episodes 5 --task "pick and place"
 
 ```
-uv run lekiwi_lerobot_replay --repo-id <hf_username/dataset_name> --episode <index>
+
+## Data Replay
+
+Reproduce recorded episodes to verify data quality:
+
+```bash
+# Replay specific episode
+uv run lekiwi_lerobot_replay --repo-id username/dataset_name --episode 0
 ```
-Example: `uv run lekiwi_lerobot_replay --repo-id francocipollone/lekiwi_sim_cubes --episode 0`
+Example:
+```bash
+uv run lekiwi_lerobot_replay --repo-id francocipollone/lekiwi_sim_cubes --episode 0
+```
 
 
-### Training a model
+## Policy Training
 
 Once you have a dataset you can start training a model. For this, we can rely directly on the lerobot utilities.
+Train imitation learning policies using collected data:
 
-```
+```bash
 uv run python -m lerobot.scripts.train \
-  --dataset.repo_id=francocipollone/pick_up_cubes \
+  --dataset.repo_id=<username/my_dataset> \
   --policy.type=act \
-  --output_dir=outputs/train/francocipollone/act_lekiwi_sim_cubes \
-  --job_name=lerobot_training \
+  --output_dir=outputs/train/username/my_policy \
+  --job_name=act_training \
   --policy.device=cuda \
-  --policy.repo_id=<your_repo_id>
-  --wandb.enable=true
+  --policy.repo_id=<username/my_policy_repo>
+
 ```
 
-### Run the policy
+## Policy Inference
 
-A simple script for running inference with the model is provided.
-```
-uv run lekiwi_lerobot_run_policy -p <repo_id_or_local_policy_path>
-```
-Example: `uv run lekiwi_lerobot_run_policy -p francocipollone/act_lekiwi_sim_cubes
+Run trained policies for autonomous operation:
 
-### Evaluating a model
+```bash
+uv run lekiwi_lerobot_run_policy --policy username/my_trained_policy
+```
+Example:
+```bash
+`uv run lekiwi_lerobot_run_policy -p francocipollone/act_lekiwi_sim_cubes
+```
 
-Evaluating the model while running the policy. A lerobot-inspired script is added for the evaluation:
+## Policy Evaluation
+
+Systematically evaluate policy performance:
+
+```bash
+uv run lekiwi_lerobot_evaluate \
+  --repo-id username/evaluation_results \
+  --policy username/my_trained_policy
 ```
-uv run lekiwi_lerobot_evaluate --repo-id <hf_username/model_name> --policy <hf_username/model_name>
-```
-Example: `uv run lekiwi_lerobot_evaluate -r francocipollone/eval_act_lekiwi_sim_cubes --policy francocipollone/act_lekiwi_sim_cubes`
+
+## License
+
+This package follows the same license as the parent repository. See the root LICENSE file for details.
