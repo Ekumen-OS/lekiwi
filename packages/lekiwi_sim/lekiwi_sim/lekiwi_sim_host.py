@@ -106,7 +106,7 @@ def main() -> None:
                 watchdog_active = False
             except zmq.Again:
                 if not watchdog_active:
-                    logging.warning("No command available")
+                    logging.debug("No command available")
             except Exception as e:
                 logging.error("Message fetching failed: %s", e)
 

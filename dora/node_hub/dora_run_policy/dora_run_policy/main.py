@@ -13,6 +13,7 @@ import numpy as np
 import pyarrow as pa
 from lerobot.datasets.utils import build_dataset_frame, hw_to_dataset_features
 from lerobot.policies.act.modeling_act import ACTPolicy
+from lerobot.policies.factory import make_pre_post_processors
 from lerobot.utils.control_utils import predict_action
 from lerobot.utils.utils import get_safe_torch_device
 
@@ -114,6 +115,11 @@ def main() -> None:
         policy.reset()
         device_name = policy.config.device or "auto"
         device = get_safe_torch_device(device_name)
+        # Build Policy Processors
+        preprocessor, postprocessor = make_pre_post_processors(
+            policy_cfg=policy.config,
+            pretrained_path=model_name,
+        )
     except Exception as e:
         raise RuntimeError(f"Failed to load policy '{model_name}': {e}") from None
 
@@ -171,8 +177,15 @@ def main() -> None:
                         observation_frame,
                         policy,
                         device,
+                        preprocessor,
+                        postprocessor,
                         policy.config.use_amp,
                     )
+
+                    # As of LeRobot 0.4.0, the postprocessor returns a tensor that might have batch dimension
+                    # Remove batch dimension if present
+                    if raw_action.dim() > 1:
+                        raw_action = raw_action.squeeze(0)
 
                     # Send action output
                     metadata = event["metadata"].copy()

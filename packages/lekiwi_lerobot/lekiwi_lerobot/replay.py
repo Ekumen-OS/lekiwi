@@ -5,6 +5,7 @@ import time
 from lerobot.datasets.lerobot_dataset import LeRobotDataset
 from lerobot.robots.lekiwi.config_lekiwi import LeKiwiClientConfig
 from lerobot.robots.lekiwi.lekiwi_client import LeKiwiClient
+from lerobot.utils.constants import ACTION
 from lerobot.utils.robot_utils import busy_wait
 
 
@@ -84,17 +85,22 @@ def main() -> None:
     logging.info(f"Downloading dataset from {args.repo_id} into {args.directory}")
     root = args.directory + "/" + args.repo_id.split("/")[-1]
     root = root.replace("//", "/")
-    dataset = LeRobotDataset(args.repo_id, root=root, episodes=[args.episode])
+    episode_to_replay = args.episode
+    dataset = LeRobotDataset(args.repo_id, root=root, episodes=[episode_to_replay])
     logging.info(f"Dataset stored at {root}")
     actions = dataset.hf_dataset.select_columns("action")
+    # Filter dataset to only include frames from the specified episode since episodes are chunked in dataset V3.0
+    episode_frames = dataset.hf_dataset.filter(lambda x: x["episode_index"] == episode_to_replay)
+    actions = episode_frames.select_columns(ACTION)
 
     robot.connect()
 
     if not robot.is_connected:
         raise ValueError("Robot is not connected!")
 
-    logging.info(f"Replaying episode {args.episode} with {dataset.num_frames} frames.")
-    for idx in range(dataset.num_frames):
+    len_episodes_frames = len(episode_frames)
+    logging.info(f"Replaying episode {args.episode} with {len_episodes_frames} frames.")
+    for idx in range(len_episodes_frames):
         t0 = time.perf_counter()
 
         action = {name: float(actions[idx]["action"][i]) for i, name in enumerate(dataset.features["action"]["names"])}

@@ -5,13 +5,13 @@ from lekiwi_lerobot.utils import record_loop
 from lekiwi_teleoperate.teleoperate.arm import ArmTeleop
 from lerobot.datasets.lerobot_dataset import LeRobotDataset
 from lerobot.datasets.utils import hw_to_dataset_features
-from lerobot.processor import make_default_processors
 from lerobot.robots.lekiwi.config_lekiwi import LeKiwiClientConfig
 from lerobot.robots.lekiwi.lekiwi_client import LeKiwiClient
 from lerobot.teleoperators.keyboard import (
     KeyboardTeleop,
     KeyboardTeleopConfig,
 )
+from lerobot.utils.constants import ACTION, OBS_STR
 from lerobot.utils.control_utils import (
     init_keyboard_listener,
 )
@@ -53,6 +53,12 @@ def main() -> None:
         default="Unnamed task",
         help="Task description to associate with each episode (default: 'Unnamed task').",
     )
+    parser.add_argument(
+        "--no-viz",
+        action="store_false",
+        dest="visualize",
+        help="Disable Rerun visualization during recording.",
+    )
 
     args = parser.parse_args()
     if args.repo_id is None:
@@ -74,8 +80,8 @@ def main() -> None:
     keyboard = KeyboardTeleop(keyboard_config)
     arm_keyboard_handler = ArmTeleop()
     # Configure the dataset features
-    action_features = hw_to_dataset_features(robot.action_features, "action")
-    obs_features = hw_to_dataset_features(robot.observation_features, "observation")
+    action_features = hw_to_dataset_features(robot.action_features, ACTION)
+    obs_features = hw_to_dataset_features(robot.observation_features, OBS_STR)
     logging.info(f"Recording the following observation features: {list(obs_features.keys())}")
     logging.info(f"Recording the following action features: {list(action_features.keys())}")
     dataset_features = {**action_features, **obs_features}
@@ -87,7 +93,7 @@ def main() -> None:
         features=dataset_features,
         robot_type=robot.name,
         use_videos=True,
-        image_writer_threads=0,
+        image_writer_threads=4,
     )
 
     # To connect you already should have:
@@ -97,8 +103,11 @@ def main() -> None:
     robot.connect()
     keyboard.connect()
 
-    init_rerun(session_name="lekiwi_record")
-    teleop_action_processor, robot_action_processor, robot_observation_processor = make_default_processors()
+    if args.visualize:
+        logging.info("Initializing Rerun for visualization.")
+        init_rerun(session_name="lekiwi_record")
+    else:
+        logging.info("Rerun visualization is disabled.")
 
     listener, events = init_keyboard_listener()
 
@@ -119,21 +128,22 @@ def main() -> None:
             arm_keyboard_handler=arm_keyboard_handler,
             control_time_s=EPISODE_TIME_SEC,
             single_task=args.task,
-            display_data=True,
+            display_data=args.visualize,
         )
 
-        # Logic for reset env
+        # Reset the environment if not stopping or re-recording
         if not events["stop_recording"] and ((recorded_episodes < args.episodes - 1) or events["rerecord_episode"]):
             logging.info("Reset the environment")
             record_loop(
                 robot=robot,
                 events=events,
                 fps=FPS,
+                dataset=None,  # Don't record during reset phase
                 keyboard_handler=keyboard,
                 arm_keyboard_handler=arm_keyboard_handler,
                 control_time_s=RESET_TIME_SEC,
                 single_task=args.task,
-                display_data=True,
+                display_data=args.visualize,
             )
 
         if events["rerecord_episode"]:
@@ -143,10 +153,12 @@ def main() -> None:
             dataset.clear_episode_buffer()
             continue
 
+        logging.info(f"Saving episode number {recorded_episodes} to dataset.")
         dataset.save_episode()
         recorded_episodes += 1
 
     # Upload to hub and clean up
+    dataset.finalize()
     dataset.push_to_hub()
 
     robot.disconnect()

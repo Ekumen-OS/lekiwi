@@ -139,6 +139,7 @@ def main() -> None:
                 robot=robot,
                 events=events,
                 fps=FPS,
+                dataset=None,  # Don't record during reset phase
                 keyboard_handler=keyboard,
                 arm_keyboard_handler=arm_keyboard_handler,
                 control_time_s=RESET_TIME_SEC,

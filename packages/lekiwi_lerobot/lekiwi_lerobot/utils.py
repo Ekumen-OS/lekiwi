@@ -8,9 +8,8 @@ from lerobot.datasets.lerobot_dataset import LeRobotDataset
 from lerobot.datasets.utils import build_dataset_frame
 from lerobot.policies.pretrained import PreTrainedPolicy
 from lerobot.processor import (
-    RobotAction,
-    RobotObservation,
-    RobotProcessorPipeline,
+    PolicyAction,
+    PolicyProcessorPipeline,
 )
 from lerobot.robots.lekiwi.lekiwi_client import LeKiwiClient
 from lerobot.teleoperators.keyboard import (
@@ -31,17 +30,12 @@ def record_loop(
     robot: LeKiwiClient,
     events: dict[Any, Any],
     fps: int,
-    teleop_action_processor: RobotProcessorPipeline[
-        tuple[RobotAction, RobotObservation], RobotAction
-    ],  # runs after teleop
-    robot_action_processor: RobotProcessorPipeline[
-        tuple[RobotAction, RobotObservation], RobotAction
-    ],  # runs before robot
-    robot_observation_processor: RobotProcessorPipeline[RobotObservation, RobotObservation],  # runs after robot
     dataset: LeRobotDataset | None = None,
     keyboard_handler: KeyboardTeleop | None = None,
     arm_keyboard_handler: ArmTeleop | None = None,
     policy: PreTrainedPolicy | None = None,
+    preprocessor: PolicyProcessorPipeline[dict[str, Any], dict[str, Any]] | None = None,
+    postprocessor: PolicyProcessorPipeline[PolicyAction, PolicyAction] | None = None,
     control_time_s: int | None = None,
     single_task: str | None = None,
     display_data: bool = False,
@@ -64,6 +58,11 @@ def record_loop(
     if control_time_s is None:
         raise ValueError("A control time must be provided.")
 
+    if display_data:
+        logging.info("Visualizing data with Rerun.")
+    else:
+        logging.info("Not visualizing data.")
+
     # if policy is given it needs cleaning up
     if policy is not None:
         policy.reset()
@@ -84,17 +83,19 @@ def record_loop(
                 raise ValueError("Dataset features must be defined if using a dataset or a policy.")
             observation_frame = build_dataset_frame(dataset.features, observation, prefix="observation")  # type: ignore[union-attr]
 
-        if policy is not None:
+        if policy is not None and preprocessor is not None and postprocessor is not None:
             action_values = predict_action(
-                observation_frame,
-                policy,
-                get_safe_torch_device(policy.config.device),
-                policy.config.use_amp,
+                observation=observation_frame,
+                policy=policy,
+                device=get_safe_torch_device(policy.config.device),
                 preprocessor=preprocessor,
                 postprocessor=postprocessor,
+                use_amp=policy.config.use_amp,
                 task=single_task,
                 robot_type=robot.robot_type,
             )
+            if action_values.dim() > 1:
+                action_values = action_values.squeeze(0)
             action = {key: action_values[i].item() for i, key in enumerate(robot.action_features)}
             print(f"Predicted action: {action}")
         elif policy is None and keyboard_handler is not None and arm_keyboard_handler is not None:
@@ -103,6 +104,8 @@ def record_loop(
             arm_action = arm_keyboard_handler.from_keyboard_to_arm_action(pressed_keys)
 
             action = {**base_action, **arm_action}  # Merge base and arm actions
+            # TODO(francocipollone): We would probably want to use the teleop_action_processor here.
+            # action = teleop_action_processor((action, observation))
             logging.debug("Sending action: %s", action)
 
         else:
@@ -113,14 +116,13 @@ def record_loop(
             )
             continue
 
-        # Action can eventually be clipped using `max_relative_target`,
-        # so action actually sent is saved in the dataset.
+        # TODO(francocipollone): We would probably want to use the robot_action_processor here before sending the action
         sent_action = robot.send_action(action)
 
         if dataset is not None:
             action_frame = build_dataset_frame(dataset.features, sent_action, prefix="action")
-            frame = {**observation_frame, **action_frame}
-            dataset.add_frame(frame, task=single_task)
+            frame = {**observation_frame, **action_frame, "task": single_task}
+            dataset.add_frame(frame)
 
         if display_data:
             log_rerun_data(observation, action)
