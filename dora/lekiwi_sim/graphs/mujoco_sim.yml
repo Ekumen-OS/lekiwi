@@ -41,23 +41,21 @@ nodes:
   ############################################################
   # Example of a rerun visualization node
   ############################################################
-  # TODO: Enable once lerobot is updated to 0.4.0 due to rerun version conflict.
-  # - id: rerun-viz
-  #   # TODO: Use tag once there is a new release
-  #   build: cargo install --git https://github.com/dora-rs/dora-hub dora-rerun
-  #   path: dora-rerun
-  #   inputs:
-  #     front_camera:
-  #       source: dora_lekiwi_client/image_front
-  #     wrist_camera:
-  #       source: dora_lekiwi_client/image_wrist
-  #     observation_state:
-  #     # ["arm_shoulder_pan.pos", "arm_shoulder_lift.pos", "arm_elbow_flex.pos", "arm_wrist_flex.pos", "arm_wrist_roll.pos", "arm_gripper.pos", "x.vel", "y.vel", "theta.vel"]
-  #       source: dora_lekiwi_client/observation_state
-  #     actions:
-  #       source: dora_run_policy/actions
-  #   env:
-  #     OPERATING_MODE: SPAWN
+  - id: rerun-viz
+    build: cargo install --git https://github.com/dora-rs/dora-hub --tag 0.3.13 dora-rerun
+    path: dora-rerun
+    inputs:
+      front_camera:
+        source: dora_lekiwi_client/image_front
+      wrist_camera:
+        source: dora_lekiwi_client/image_wrist
+      observation_state:
+      # ["arm_shoulder_pan.pos", "arm_shoulder_lift.pos", "arm_elbow_flex.pos", "arm_wrist_flex.pos", "arm_wrist_roll.pos", "arm_gripper.pos", "x.vel", "y.vel", "theta.vel"]
+        source: dora_lekiwi_client/observation_state
+      actions:
+        source: dora_run_policy/actions
+    env:
+      OPERATING_MODE: SPAWN
 
   ###########################################################
   # Example of a recorder node. The outputs are parquet files.

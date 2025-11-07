@@ -87,19 +87,31 @@ def main() -> None:
 
     arm_teleop = ArmTeleop()
 
-    while True:
-        t0 = time.perf_counter()
+    try:
+        while True:
+            t0 = time.perf_counter()
 
-        observation = robot.get_observation()
+            observation = robot.get_observation()
 
-        keyboard_keys = keyboard.get_action()
-        base_action = robot._from_keyboard_to_base_action(keyboard_keys)
-        arm_action = arm_teleop.from_keyboard_to_arm_action(keyboard_keys)
+            keyboard_keys = keyboard.get_action()
+            base_action = robot._from_keyboard_to_base_action(keyboard_keys)
+            arm_action = arm_teleop.from_keyboard_to_arm_action(keyboard_keys)
 
-        log_rerun_data(observation, {**arm_action, **base_action})
+            log_rerun_data(observation, {**arm_action, **base_action})
 
-        action = {**base_action, **arm_action}  # Merge base and arm actions
-        logging.debug("Sending action: %s", action)
-        robot.send_action(action)
+            action = {**base_action, **arm_action}  # Merge base and arm actions
+            logging.debug("Sending action: %s", action)
+            robot.send_action(action)
 
-        busy_wait(max(1.0 / FPS - (time.perf_counter() - t0), 0.0))
+            busy_wait(max(1.0 / FPS - (time.perf_counter() - t0), 0.0))
+    except KeyboardInterrupt:
+        print("Keyboard interrupt received. Exiting...")
+
+    finally:
+        robot.disconnect()
+        keyboard.disconnect()
+        logging.info("LeKiwi teleoperation client has been disconnected.")
+
+
+if __name__ == "__main__":
+    main()
