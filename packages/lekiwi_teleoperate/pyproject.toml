@@ -1,6 +1,8 @@
 [project]
 name = "lekiwi_teleoperate"
 version = "0.1.0"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
 authors = [{ name = "Franco Cipollone", email = "franco.c@ekumenlabs.com"}]
 description = "Teleoperate the Lekiwi robot using a keyboard."
 readme = "README.md"

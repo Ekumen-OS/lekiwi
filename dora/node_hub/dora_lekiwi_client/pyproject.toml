@@ -1,9 +1,10 @@
 [project]
 name = "dora_lekiwi_client"
 version = "0.1.0"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
 authors = [{ name = "Franco Cipollone", email = "franco.c@ekumenlabs.com" }]
 description = "dora_lekiwi_client"
-license = { text = "MIT" }
 readme = "README.md"
 requires-python = ">=3.10"
 
