@@ -38,7 +38,7 @@
              - solref and solimp values tuned for better contact behavior with ground plane to reduce bouncing and allowing for stable movement(mainly at high speeds)
              - rgba alpha set to 0 to make collision geom invisible
              -->
-            <geom type="cylinder" size="0.051 0.01" pos="0 0 0" euler="0 0 0"
+            <geom type="capsule" size="0.051 0.001" pos="0 0 0" euler="0 0 0"
                   friction="1.0 0.05 0.001" solref="0.10 0.7" solimp="0.3 0.6 0.001"
                   rgba="1 0 0 0" group="0"/>
         </default>
@@ -67,7 +67,7 @@
                         <inertial mass="0.08665496109754897" pos="8.50877658112488e-09 7.358945011137765e-09 0.0023811166424899887" fullinertia="1.2296291761641504e-05 1.2296276073121143e-05 2.2911778015411222e-05 -3.19167294920219e-12 1.755992026942528e-12 1.5186622033709633e-12" />
                         <body name="wheel_back_link" pos="0 0 0.01746" euler="-3.14159 0 0">
                             <geom class="wheel_visual"/>
-                            <geom class="wheel_collision"/>
+                            <geom name="wheel_back_collision" class="wheel_collision"/>
                             <inertial mass="1.3542854082324305" pos="-7.105207895657716e-08 -1.1369917947312704e-07 -1.2090586078983279e-08" fullinertia="0.0010936200374455458 0.0010936108480286116 0.0018798127501507855 -5.245142023675448e-09 4.046730352778215e-10 1.0004485488405523e-10" />
                         </body>
                     </body>
@@ -85,7 +85,7 @@
                         <inertial mass="0.08665496109754897" pos="8.50877658112488e-09 7.358945011137765e-09 0.0023811166424899887" fullinertia="1.2296291761641504e-05 1.2296276073121143e-05 2.2911778015411222e-05 -3.19167294920219e-12 1.755992026942528e-12 1.5186622033709633e-12" />
                         <body name="wheel_right_link" pos="0 0 0.01746" euler="-3.14159 0 0">
                             <geom class="wheel_visual"/>
-                            <geom class="wheel_collision"/>
+                            <geom name="wheel_right_collision" class="wheel_collision"/>
                             <inertial mass="1.3542854082324305" pos="-7.105207895657716e-08 -1.1369917947312704e-07 -1.2090586078983279e-08" fullinertia="0.0010936200374455458 0.0010936108480286116 0.0018798127501507855 -5.245142023675448e-09 4.046730352778215e-10 1.0004485488405523e-10" />
                         </body>
                     </body>
@@ -103,7 +103,7 @@
                         <inertial mass="0.08665496109754897" pos="8.50877658112488e-09 7.358945011137765e-09 0.0023811166424899887" fullinertia="1.2296291761641504e-05 1.2296276073121143e-05 2.2911778015411222e-05 -3.19167294920219e-12 1.755992026942528e-12 1.5186622033709633e-12" />
                         <body name="wheel_left_link" pos="0 0 0.01746" euler="-3.14159 0 0">
                             <geom class="wheel_visual"/>
-                            <geom class="wheel_collision"/>
+                            <geom name="wheel_left_collision" class="wheel_collision"/>
                             <inertial mass="1.3542854082324305" pos="-7.105207895657716e-08 -1.1369917947312704e-07 -1.2090586078983279e-08" fullinertia="0.0010936200374455458 0.0010936108480286116 0.0018798127501507855 -5.245142023675448e-09 4.046730352778215e-10 1.0004485488405523e-10" />
                         </body>
                     </body>
@@ -163,4 +163,10 @@
             </body>
         </body>
     </worldbody>
+
+    <contact>
+      <pair name="omniwheel_back" geom1="floor" geom2="wheel_back_collision" condim="3" friction="0.05 1."/>
+      <pair name="omniwheel_left" geom1="floor" geom2="wheel_left_collision" condim="3" friction="0.05 1."/>
+      <pair name="omniwheel_right" geom1="floor" geom2="wheel_right_collision" condim="3" friction="0.05 1."/>
+    </contact>
 </mujoco>
