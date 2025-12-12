@@ -79,7 +79,7 @@ Once you have a dataset you can start training a model. For this, we can rely di
 Train imitation learning policies using collected data:
 
 ```bash
-uv run python -m lerobot.scripts.train \
+uv run lerobot-train \
   --dataset.repo_id=<username/my_dataset> \
   --policy.type=act \
   --output_dir=outputs/train/username/my_policy \

@@ -9,7 +9,7 @@ FROM mcr.microsoft.com/devcontainers/base:${BASE_IMAGE}
 # Configuration
 ################################################################################
 
-ARG RUST_VERSION=1.86.0
+ARG RUST_VERSION=1.88.0
 
 ################################################################################
 # User 'dev'

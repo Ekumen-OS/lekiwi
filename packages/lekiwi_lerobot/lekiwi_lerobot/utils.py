@@ -1,6 +1,6 @@
 import logging
 import time
-from typing import Any
+from typing import Any, Union
 
 from lekiwi_teleoperate.teleoperate.arm import ArmTeleop
 from lerobot.datasets.image_writer import safe_stop_image_writer
@@ -15,6 +15,7 @@ from lerobot.robots.lekiwi.lekiwi_client import LeKiwiClient
 from lerobot.teleoperators.keyboard import (
     KeyboardTeleop,
 )
+from lerobot.teleoperators.so101_leader import SO101Leader
 from lerobot.utils.control_utils import (
     predict_action,
 )
@@ -32,7 +33,7 @@ def record_loop(
     fps: int,
     dataset: LeRobotDataset | None = None,
     keyboard_handler: KeyboardTeleop | None = None,
-    arm_keyboard_handler: ArmTeleop | None = None,
+    arm_keyboard_handler: Union[ArmTeleop, SO101Leader, None] = None,
     policy: PreTrainedPolicy | None = None,
     preprocessor: PolicyProcessorPipeline[dict[str, Any], dict[str, Any]] | None = None,
     postprocessor: PolicyProcessorPipeline[PolicyAction, PolicyAction] | None = None,
@@ -101,7 +102,13 @@ def record_loop(
         elif policy is None and keyboard_handler is not None and arm_keyboard_handler is not None:
             pressed_keys = keyboard_handler.get_action()
             base_action = robot._from_keyboard_to_base_action(pressed_keys)
-            arm_action = arm_keyboard_handler.from_keyboard_to_arm_action(pressed_keys)
+
+            # Handle both ArmTeleop (keyboard-based) and SO101Leader (physical arm)
+            if isinstance(arm_keyboard_handler, SO101Leader):
+                arm_action = arm_keyboard_handler.get_action()
+                arm_action = {f"arm_{k}": v for k, v in arm_action.items()}
+            else:
+                arm_action = arm_keyboard_handler.from_keyboard_to_arm_action(pressed_keys)
 
             action = {**base_action, **arm_action}  # Merge base and arm actions
             # TODO(francocipollone): We would probably want to use the teleop_action_processor here.

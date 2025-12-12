@@ -33,7 +33,7 @@
       <joint frictionloss="0.1" armature="0.1"/>
       <position kp="50" dampratio="1" forcerange="-3.5 3.5"/>
       <default class="Rotation">
-        <joint axis="0 1 0" range="-1.92 1.92"/>
+        <joint axis="0 -1 0" range="-1.92 1.92"/>
       </default>
       <default class="Pitch">
         <joint axis="1 0 0" range="-1.747 1.747"/>

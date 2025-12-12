@@ -4,6 +4,7 @@ import time
 
 from lerobot.robots.lekiwi import LeKiwiClient, LeKiwiClientConfig
 from lerobot.teleoperators.keyboard.teleop_keyboard import KeyboardTeleop, KeyboardTeleopConfig
+from lerobot.teleoperators.so101_leader import SO101Leader, SO101LeaderConfig
 from lerobot.utils.robot_utils import busy_wait
 from lerobot.utils.visualization_utils import init_rerun, log_rerun_data
 
@@ -59,6 +60,18 @@ def main() -> None:
         default="127.0.0.1",
         help="IP address of the robot (default: 127.0.0.1).",
     )
+    parser.add_argument(
+        "-la",
+        "--leader-arm",
+        action="store_true",
+        help="Use the leader arm for teleoperation (default: False).",
+    )
+    parser.add_argument(
+        "--leader-arm-port",
+        type=str,
+        default="/dev/ttyACM0",
+        help="Serial port for the leader arm (default: /dev/ttyACM0).",
+    )
     args = parser.parse_args()
     log_level = args.level.upper()
     logging.basicConfig(
@@ -69,6 +82,8 @@ def main() -> None:
     # Create the robot and teleoperator configurations
     robot_config = LeKiwiClientConfig(remote_ip=args.ip, id="my_lekiwi")
     keyboard_config = KeyboardTeleopConfig(id="my_laptop_keyboard")
+    if args.leader_arm:
+        teleop_arm_config = SO101LeaderConfig(port=args.leader_arm_port, id="lekiwi_leader_arm")
 
     robot = LeKiwiClient(robot_config)
     keyboard = KeyboardTeleop(keyboard_config)
@@ -76,16 +91,23 @@ def main() -> None:
     # To connect you already should have this script running on LeKiwi: `uv run lekiwi_sim`
     robot.connect()
     keyboard.connect()
+    if args.leader_arm:
+        leader_arm = SO101Leader(teleop_arm_config)
+        leader_arm.connect()
+    else:
+        arm_teleop = ArmTeleop()
 
     init_rerun(session_name="lekiwi_teleop")
 
-    if not robot.is_connected or not keyboard.is_connected:
-        raise ValueError("Robot, leader arm of keyboard is not connected!")
+    if not robot.is_connected:
+        raise ValueError("Robot is not connected!")
+    if not keyboard.is_connected:
+        raise ValueError("Keyboard is not connected!")
+    if args.leader_arm and not leader_arm.is_connected:
+        raise ValueError("Leader arm is not connected!")
 
     logging.info("Robot and keyboard are connected.")
     print(COMMANDS_STR.format(**robot_config.teleop_keys, **ArmTeleop.ARM_TELEOP_KEYS))
-
-    arm_teleop = ArmTeleop()
 
     try:
         while True:
@@ -95,7 +117,11 @@ def main() -> None:
 
             keyboard_keys = keyboard.get_action()
             base_action = robot._from_keyboard_to_base_action(keyboard_keys)
-            arm_action = arm_teleop.from_keyboard_to_arm_action(keyboard_keys)
+            if args.leader_arm:
+                arm_action = leader_arm.get_action()
+                arm_action = {f"arm_{k}": v for k, v in arm_action.items()}
+            else:
+                arm_action = arm_teleop.from_keyboard_to_arm_action(keyboard_keys)
 
             log_rerun_data(observation, {**arm_action, **base_action})
 

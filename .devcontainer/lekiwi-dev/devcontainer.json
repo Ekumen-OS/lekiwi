@@ -40,6 +40,12 @@
         "--network=host",
         "--runtime=nvidia", // Use NVIDIA runtime for GPU access
         "--gpus=all", // Use all available GPUs
-        "--name=lekiwi-dora"
+        "--name=lekiwi-dev"
+    ],
+    // 9090: This is a web server that serves the frontend for the Rerun application.
+    // 9876: This is the grpc server to transmit info for the items to be drawn.
+    "forwardPorts": [
+        9090,
+        9876
     ]
 }

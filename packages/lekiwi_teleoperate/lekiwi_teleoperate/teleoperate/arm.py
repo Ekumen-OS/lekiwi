@@ -11,8 +11,8 @@ class ArmTeleop:
     """
 
     ARM_TELEOP_KEYS = {
-        "shoulder_pan_left": "t",
-        "shoulder_pan_right": "g",
+        "shoulder_pan_left": "g",
+        "shoulder_pan_right": "t",
         "shoulder_lift_up": "y",
         "shoulder_lift_down": "h",
         "elbow_flex_up": "u",
