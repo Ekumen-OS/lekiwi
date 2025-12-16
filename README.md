@@ -18,13 +18,13 @@ Comprehensive monorepo for LeKiwi robot software development, combining simulati
 ## :package: Project Structure
 
 ```
-lekiwi-dora/
+lekiwi/
 ├── 📁 packages/                             # Python packages
 │   ├── 🎮 lekiwi_sim/                       # MuJoCo simulation environment
 │   ├── 🤖 lekiwi_lerobot/                   # LeRobot integration scripts
 │   └── 🕹️ lekiwi_teleoperate/               # Teleoperation interface
 ├── 📁 dora/                                 # Dora Integration
-│   └── 📁 graphs/                           # Dora dataflows
+│   └── 📁 lekiwi/graphs/                    # Dora dataflows
 │   └── 📁 node_hub/                         # Dora nodes
 │       ├── 🔗 dora_lekiwi_client/           # Robot interface node
 │       ├── 🧠 dora_run_policy/              # Policy execution node
@@ -209,9 +209,9 @@ See [packages/lekiwi_lerobot/README.md](packages/lekiwi_lerobot/README.md) for d
 
 ### Available Dataflows
 
-The repository includes pre-configured dataflow graphs in `dora/lekiwi_sim/graphs/`:
+The repository includes pre-configured dataflow graphs in `dora/lekiwi/graphs/`:
 
-**1. Policy Execution Dataflow** (`mujoco_sim.yml`):
+**1. Policy Execution Dataflow** (`dataflow.yml`):
    - Complete pipeline for running trained policies on simulation
    - Connects robot observations → policy inference → robot actions
    - Includes camera feeds and state observations
@@ -221,21 +221,25 @@ The repository includes pre-configured dataflow graphs in `dora/lekiwi_sim/graph
 
 **Prerequisites:**
 ```bash
-# Start simulation in separate terminal
+
+# Start simulation (or alternatively the real robot).
 uv run lekiwi_host_sim
 ```
 
 **Run the policy execution dataflow:**
 ```bash
 # Navigate to dataflow directory
-cd dora/lekiwi_sim/graphs/
+cd dora/lekiwi/graphs/
+
+# Build if not built already
+dora build dataflow.yml
 
 # Start the dataflow
-dora run mujoco_sim.yml --uv
+dora run dataflow.yml --uv
 
 ```
 
-**Optional features** (uncomment in `mujoco_sim.yml`):
+**Optional features** (uncomment in `dataflow.yml`):
 - **Visualization**: Enable `rerun-viz` node for real-time 3D visualization
 - **Data Recording**: Enable `dora-record` node to save observations to Parquet files
 - **Testing Mode**: Use `dora_lekiwi_action_publisher` instead of policy for hardcoded actions

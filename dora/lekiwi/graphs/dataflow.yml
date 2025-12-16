@@ -10,6 +10,8 @@ nodes:
       - observation_state
       - image_front
       - image_wrist
+    env:
+      LEKIWI_IP: 192.168.1.108 # Use the appropriate IP for real robot
 
   ######################################################
   # Example of a hard-coded action publisher.
