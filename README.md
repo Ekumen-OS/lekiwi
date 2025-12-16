@@ -166,9 +166,19 @@ Manual control interface using the LeRobot API:
 # Start simulation or real robot first
 uv run lekiwi_host_sim  # For simulation
 
-# Then teleoperate
+# Then teleoperate the simulated or real robot.
 uv run lekiwi_teleoperate
 ```
+By default it will allow you to teleoperate the Lekiwi completely using the keyboard.
+If you have a leader arm you can use it to teleoperate the arm part in the simulation as well:
+
+```bash
+uv run lekiwi_teleoperate --leader-arm
+```
+
+INSERT VIDEO HERE
+
+
 
 ### Data Collection & Training
 
@@ -180,7 +190,7 @@ uv run lekiwi_lerobot_record --repo-id your_username/dataset_name --episodes 50
 uv run lekiwi_lerobot_replay --repo-id your_username/dataset_name --episode 0
 
 # Train a policy (see lekiwi_lerobot README for full training options)
-python -m lerobot.scripts.train \
+uv run lerobot-train \
   --dataset.repo_id=your_username/dataset_name \
   --policy.type=act \
   --output_dir=outputs/my_policy
