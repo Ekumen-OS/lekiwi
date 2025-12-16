@@ -63,9 +63,11 @@ def main() -> None:
     logging.info(f"Loading policy from '{args.policy}'")
     if args.policy_type == "act":
         from lerobot.policies.act.modeling_act import ACTPolicy
+
         policy = ACTPolicy.from_pretrained(args.policy)
     elif args.policy_type == "smolvla":
         from lerobot.policies.smolvla.modeling_smolvla import SmolVLAPolicy
+
         policy = SmolVLAPolicy.from_pretrained(args.policy)
     else:
         raise ValueError(f"Policy type '{args.policy_type}' not supported.")

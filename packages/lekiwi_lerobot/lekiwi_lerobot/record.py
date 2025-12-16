@@ -96,7 +96,8 @@ def main() -> None:
     # Camera config should match the one used in the robot config
     # when starting the robot host or simulation.
     #
-    # Based on: --robot.cameras="{ front: {type: opencv, index_or_path: /dev/video0, width: 640, height: 480, fps: 30}, wrist: {type: opencv, index_or_path: /dev/video2, width: 640, height: 480, fps: 30}}"
+    # Based on: --robot.cameras="{ front: {type: opencv, index_or_path: /dev/video0, width: 640, height: 480, fps: 30},
+    # wrist: {type: opencv, index_or_path: /dev/video2, width: 640, height: 480, fps: 30}}"
     camera_config: dict[str, CameraConfig] = {
         "front": CameraConfig(width=640, height=480, fps=30),
         "wrist": CameraConfig(width=640, height=480, fps=30),
