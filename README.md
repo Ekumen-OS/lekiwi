@@ -176,8 +176,7 @@ If you have a leader arm you can use it to teleoperate the arm part in the simul
 uv run lekiwi_teleoperate --leader-arm
 ```
 
-INSERT VIDEO HERE
-
+[lekiwi_sim_leader_LOW.webm](https://github.com/user-attachments/assets/76e565cd-93d2-42ae-976d-3d25091039a4)
 
 
 ### Data Collection & Training
