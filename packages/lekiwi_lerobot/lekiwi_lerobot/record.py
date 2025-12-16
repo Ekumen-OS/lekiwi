@@ -3,6 +3,7 @@ import logging
 
 from lekiwi_lerobot.utils import record_loop
 from lekiwi_teleoperate.teleoperate.arm import ArmTeleop
+from lerobot.cameras.configs import CameraConfig
 from lerobot.datasets.lerobot_dataset import LeRobotDataset
 from lerobot.datasets.utils import hw_to_dataset_features
 from lerobot.robots.lekiwi.config_lekiwi import LeKiwiClientConfig
@@ -92,8 +93,17 @@ def main() -> None:
         level=log_level, format="%(asctime)s | %(levelname)-8s | %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
     )
 
+    # Camera config should match the one used in the robot config
+    # when starting the robot host or simulation.
+    #
+    # Based on: --robot.cameras="{ front: {type: opencv, index_or_path: /dev/video0, width: 640, height: 480, fps: 30}, wrist: {type: opencv, index_or_path: /dev/video2, width: 640, height: 480, fps: 30}}"
+    camera_config: dict[str, CameraConfig] = {
+        "front": CameraConfig(width=640, height=480, fps=30),
+        "wrist": CameraConfig(width=640, height=480, fps=30),
+    }
+
     # Create the robot and teleoperator configurations
-    robot_config = LeKiwiClientConfig(remote_ip=args.ip, id="lekiwi")
+    robot_config = LeKiwiClientConfig(remote_ip=args.ip, id="lekiwi", cameras=camera_config)
     keyboard_config = KeyboardTeleopConfig()
     if args.leader_arm:
         teleop_arm_config = SO101LeaderConfig(port=args.leader_arm_port, id="lekiwi_leader_arm")

@@ -46,6 +46,13 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Run the LeKiwi replay client.")
 
     parser.add_argument(
+        "-i",
+        "--ip",
+        type=str,
+        default="127.0.0.1",
+        help="IP address of the robot (default: 127.0.0.1).",
+    )
+    parser.add_argument(
         "-l",
         "--level",
         choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
@@ -79,7 +86,7 @@ def main() -> None:
         level=log_level, format="%(asctime)s | %(levelname)-8s | %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
     )
 
-    robot_config = LeKiwiClientConfig(remote_ip="127.0.0.1", id="lekiwi")
+    robot_config = LeKiwiClientConfig(remote_ip=args.ip, id="lekiwi")
     robot = LeKiwiClient(robot_config)
 
     logging.info(f"Downloading dataset from {args.repo_id} into {args.directory}")

@@ -3,7 +3,6 @@ import logging
 import time
 
 from lerobot.datasets.utils import build_dataset_frame, hw_to_dataset_features
-from lerobot.policies.act.modeling_act import ACTPolicy
 from lerobot.policies.factory import make_pre_post_processors
 from lerobot.robots.lekiwi.config_lekiwi import LeKiwiClientConfig
 from lerobot.robots.lekiwi.lekiwi_client import LeKiwiClient
@@ -63,7 +62,11 @@ def main() -> None:
 
     logging.info(f"Loading policy from '{args.policy}'")
     if args.policy_type == "act":
+        from lerobot.policies.act.modeling_act import ACTPolicy
         policy = ACTPolicy.from_pretrained(args.policy)
+    elif args.policy_type == "smolvla":
+        from lerobot.policies.smolvla.modeling_smolvla import SmolVLAPolicy
+        policy = SmolVLAPolicy.from_pretrained(args.policy)
     else:
         raise ValueError(f"Policy type '{args.policy_type}' not supported.")
     policy.reset()
