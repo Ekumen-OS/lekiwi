@@ -19,7 +19,8 @@ import numpy as np
 import zmq
 from lerobot.robots.lekiwi.config_lekiwi import LeKiwiHostConfig
 
-from .robot import LeKiwiMujoco, LeKiwiMujocoConfig
+from .config_lekiwi_mujoco import LeKiwiMujocoConfig
+from .lekiwi_mujoco import LeKiwiMujoco
 
 
 def encode_image_to_base64(image: np.ndarray) -> str:

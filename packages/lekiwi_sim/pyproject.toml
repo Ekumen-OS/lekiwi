@@ -1,5 +1,5 @@
 [project]
-name = "lekiwi_sim"
+name = "lerobot_robot_lekiwi_sim"
 version = "0.1.0"
 license = "Apache-2.0"
 license-files = ["LICENSE"]
@@ -7,15 +7,17 @@ authors = [
   { name = "Ari Lowy", email = "arilow@ekumenlabs.com" },
   { name = "Franco Cipollone", email = "franco.c@ekumenlabs.com"},
 ]
-description = "Python package for simulating the Lekiwi robot in MuJoCo."
+description = "LeRobot third-party robot plugin: MuJoCo simulation of the LeKiwi robot."
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
     "mujoco>=3.2.6",
     "lerobot==0.4.0",
-    "pyzmq>=25.0.0",
     "numpy>=1.24.0",
 ]
+
+[project.optional-dependencies]
+host = ["pyzmq>=25.0.0", "opencv-python>=4.0.0"]
 
 [build-system]
 requires = ["setuptools"]
@@ -25,5 +27,5 @@ build-backend = "setuptools.build_meta"
 dev = ["pytest >=8.1.1", "ruff >=0.9.1"]
 
 [project.scripts]
-lekiwi_sim_host = "lekiwi_sim.lekiwi_sim_host:main"
-standalone_mujoco_sim = "lekiwi_sim.standalone_mujoco_sim:main"
+lekiwi_sim_host = "lerobot_robot_lekiwi_sim.lekiwi_sim_host:main"
+standalone_mujoco_sim = "lerobot_robot_lekiwi_sim.standalone_mujoco_sim:main"

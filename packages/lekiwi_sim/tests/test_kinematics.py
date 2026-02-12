@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from lekiwi_sim.kinematics import LeKiwiMobileBase
+from lerobot_robot_lekiwi_sim.kinematics import LeKiwiMobileBase
 
 ROBOT_BASE_RADIUS = 0.125  # meters
 WHEEL_RADIUS = 0.05  # meters
