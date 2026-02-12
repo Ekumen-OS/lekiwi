@@ -23,6 +23,9 @@ host = ["pyzmq>=25.0.0", "opencv-python>=4.0.0"]
 requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
+[tool.setuptools.package-data]
+lerobot_robot_lekiwi_sim = ["assets/**/*"]
+
 [dependency-groups]
 dev = ["pytest >=8.1.1", "ruff >=0.9.1"]
 

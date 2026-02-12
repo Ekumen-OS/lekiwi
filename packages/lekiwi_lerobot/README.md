@@ -15,7 +15,6 @@ Machine learning integration package for the LeKiwi robot, providing tools for d
 
 - Python 3.11+
 - [lerobot](https://pypi.org/project/lerobot/) >= 0.3.3
-- [lekiwi_teleoperate](../lekiwi_teleoperate/) >= 0.1.0
 - Hugging Face account with authentication
 - CUDA-capable GPU (recommended for training)
 

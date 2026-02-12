@@ -1,8 +1,8 @@
 import argparse
 import logging
 
+from lekiwi_lerobot.arm_teleop import ArmTeleop
 from lekiwi_lerobot.utils import record_loop
-from lekiwi_teleoperate.teleoperate.arm import ArmTeleop
 from lerobot.cameras.configs import CameraConfig
 from lerobot.datasets.lerobot_dataset import LeRobotDataset
 from lerobot.datasets.utils import hw_to_dataset_features

@@ -1,15 +1,15 @@
 [project]
-name = "lekiwi_teleoperate"
+name = "lerobot_teleoperator_lekiwi_keyboard"
 version = "0.1.0"
 license = "Apache-2.0"
 license-files = ["LICENSE"]
 authors = [{ name = "Franco Cipollone", email = "franco.c@ekumenlabs.com"}]
-description = "Teleoperate the Lekiwi robot using a keyboard."
+description = "LeRobot third-party teleoperator plugin: full keyboard teleoperation (base + arm) for the LeKiwi robot."
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.10"
 dependencies = [
-    "lerobot==0.4.0",
-    "pyzmq>=25.0.0",
+    "lerobot>=0.4.0",
+    "numpy>=1.24.0",
 ]
 
 [build-system]
@@ -18,6 +18,3 @@ build-backend = "setuptools.build_meta"
 
 [dependency-groups]
 dev = ["pytest >=8.1.1", "ruff >=0.9.1"]
-
-[project.scripts]
-lekiwi_teleoperate = "lekiwi_teleoperate.main:main"

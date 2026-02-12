@@ -22,7 +22,7 @@ lekiwi/
 ├── 📁 packages/                             # Python packages
 │   ├── 🎮 lekiwi_sim/                       # MuJoCo simulation environment
 │   ├── 🤖 lekiwi_lerobot/                   # LeRobot integration scripts
-│   └── 🕹️ lekiwi_teleoperate/               # Teleoperation interface
+│   └── 🕹️ lekiwi_teleoperator/              # LeRobot teleoperator plugin
 ├── 📁 dora/                                 # Dora Integration
 │   └── 📁 lekiwi/graphs/                    # Dora dataflows
 │   └── 📁 node_hub/                         # Dora nodes
@@ -84,7 +84,7 @@ uv run lekiwi_host_sim
 
 **Terminal 2 - Teleoperate:**
 ```bash
-uv run lekiwi_teleoperate
+uv run lerobot-teleoperate --robot.type=lekiwi_mujoco --teleop.type=lekiwi_keyboard
 ```
 
 ## :gear: Build System
@@ -167,7 +167,7 @@ Manual control interface using the LeRobot API:
 uv run lekiwi_host_sim  # For simulation
 
 # Then teleoperate the simulated or real robot.
-uv run lekiwi_teleoperate
+uv run lerobot-teleoperate --robot.type=lekiwi_mujoco --teleop.type=lekiwi_keyboard
 ```
 
 [lekiwi_sim_pick_cube.webm](https://github.com/user-attachments/assets/32af6eca-834b-4ba4-8609-33bc428cb75f)
@@ -176,7 +176,7 @@ By default it will allow you to teleoperate the Lekiwi completely using the keyb
 If you have a leader arm you can use it to teleoperate the arm part in the simulation as well:
 
 ```bash
-uv run lekiwi_teleoperate --leader-arm
+uv run lerobot-teleoperate --robot.type=lekiwi_mujoco --teleop.type=lekiwi_keyboard --teleop.leader_arm_port=/dev/ttyACM0
 ```
 
 [lekiwi_sim_leader_LOW.webm](https://github.com/user-attachments/assets/76e565cd-93d2-42ae-976d-3d25091039a4)
@@ -287,7 +287,7 @@ This repository uses:
 - [Development Environment Setup](.devcontainer/README.md)
 - [Simulation Package](packages/lekiwi_sim/README.md)
 - [LeRobot Integration](packages/lekiwi_lerobot/README.md)
-- [Teleoperation](packages/lekiwi_teleoperate/README.md)
+- [Teleoperation](packages/lekiwi_teleoperator/README.md)
 - [LeKiwi Hardware Documentation](https://github.com/SIGRobotics-UIUC/LeKiwi)
 - [LeRobot Official Docs](https://huggingface.co/docs/lerobot/en/lekiwi)
 

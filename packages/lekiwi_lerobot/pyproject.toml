@@ -8,13 +8,9 @@ description = "Lekiwi lerobot integration."
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "lekiwi_teleoperate>=0.1.0",
     "lerobot==0.4.0",
     "numpy>=1.24.0",
 ]
-
-[tool.uv.sources]
-lekiwi_teleoperate = { workspace = true }
 
 [build-system]
 requires = ["setuptools"]

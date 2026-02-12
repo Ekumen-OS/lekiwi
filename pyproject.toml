@@ -10,7 +10,7 @@ dependencies = [
   "dora_run_policy",
   "lekiwi_lerobot",
   "lerobot_robot_lekiwi_sim",
-  "lekiwi_teleoperate",
+  "lerobot_teleoperator_lekiwi_keyboard",
 ]
 
 [build-system]
@@ -43,4 +43,4 @@ dora_lekiwi_client = { workspace = true }
 dora_run_policy = { workspace = true }
 lekiwi_lerobot = { workspace = true }
 lerobot_robot_lekiwi_sim = { workspace = true }
-lekiwi_teleoperate = { workspace = true }
+lerobot_teleoperator_lekiwi_keyboard = { workspace = true }

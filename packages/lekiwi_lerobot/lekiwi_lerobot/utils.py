@@ -2,7 +2,7 @@ import logging
 import time
 from typing import Any, Union
 
-from lekiwi_teleoperate.teleoperate.arm import ArmTeleop
+from lekiwi_lerobot.arm_teleop import ArmTeleop
 from lerobot.datasets.image_writer import safe_stop_image_writer
 from lerobot.datasets.lerobot_dataset import LeRobotDataset
 from lerobot.datasets.utils import build_dataset_frame

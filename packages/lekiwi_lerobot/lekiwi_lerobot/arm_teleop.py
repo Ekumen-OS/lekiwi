@@ -1,3 +1,5 @@
+"""Keyboard-based arm teleoperation utility for the LeKiwi robot."""
+
 from typing import Any
 
 import numpy as np
